@@ -2,6 +2,7 @@
   "name": "@nexora/config",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "files": ["tsconfig", "eslint", "tailwind"],
   "exports": {
     "./tsconfig/base.json": "./tsconfig/base.json",

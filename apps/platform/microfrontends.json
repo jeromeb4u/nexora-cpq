@@ -1,0 +1,32 @@
+{
+  "$schema": "https://openapi.vercel.sh/microfrontends.json",
+  "applications": {
+    "nexora-platform": {
+      "packageName": "@nexora/platform",
+      "development": {
+        "local": 3000,
+        "fallback": "nexora-platform.vercel.app"
+      }
+    },
+    "nexora-cpq": {
+      "packageName": "@nexora/cpq",
+      "development": {
+        "local": 3001
+      },
+      "routing": [
+        {
+          "paths": [
+            "/quotes",
+            "/quotes/:path*",
+            "/configure",
+            "/configure/:path*",
+            "/products",
+            "/products/:path*",
+            "/approvals",
+            "/approvals/:path*"
+          ]
+        }
+      ]
+    }
+  }
+}
