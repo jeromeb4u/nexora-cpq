@@ -39,9 +39,49 @@ function requiredSecret(): string {
   return secret;
 }
 
+/**
+ * Origins allowed to call the auth endpoints.
+ *
+ * Better Auth rejects a request whose `Origin` header is not trusted, with a
+ * bare 403 — which is correct CSRF defence and a real trap in a micro frontend.
+ * The browser is served from the PROXY origin (the microfrontends dev proxy, or
+ * the Vercel edge in production), not from the Platform app's own origin, so
+ * the proxy origin has to be trusted explicitly or every mutation fails.
+ *
+ * Driven by environment so production lists real domains rather than localhost.
+ */
+function trustedOrigins(): string[] {
+  const configured = (process.env.AUTH_TRUSTED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const origins = new Set<string>(configured);
+
+  for (const candidate of [
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_PLATFORM_URL,
+    process.env.NEXT_PUBLIC_CPQ_URL,
+  ]) {
+    if (candidate) origins.add(candidate);
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    // The local microfrontends proxy: the origin a developer actually browses.
+    origins.add('http://localhost:3024');
+  }
+
+  if (process.env.VERCEL_URL) {
+    origins.add(`https://${process.env.VERCEL_URL}`);
+  }
+
+  return [...origins];
+}
+
 export const auth = betterAuth({
   secret: requiredSecret(),
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  trustedOrigins: trustedOrigins(),
 
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
