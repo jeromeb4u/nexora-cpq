@@ -39,9 +39,6 @@ const nextConfig: NextConfig = {
     // Never ship a build that does not typecheck.
     ignoreBuildErrors: false,
   },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
 
   experimental: {
     // Prisma's generated client must not be bundled into server chunks.
