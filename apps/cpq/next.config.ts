@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
     '@nexora/auth',
     '@nexora/db',
     '@nexora/cpq-engine',
+    '@nexora/observability',
   ],
 
   typescript: {

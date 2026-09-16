@@ -16,6 +16,7 @@
     "@nexora/auth": "workspace:*",
     "@nexora/cpq-engine": "workspace:*",
     "@nexora/db": "workspace:*",
+    "@nexora/observability": "workspace:*",
     "@nexora/types": "workspace:*",
     "@nexora/ui": "workspace:*",
     "@nexora/validation": "workspace:*",

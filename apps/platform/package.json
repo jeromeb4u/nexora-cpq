@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^5.9.1",
     "@nexora/auth": "workspace:*",
     "@nexora/db": "workspace:*",
+    "@nexora/observability": "workspace:*",
     "@nexora/types": "workspace:*",
     "@nexora/ui": "workspace:*",
     "@nexora/validation": "workspace:*",

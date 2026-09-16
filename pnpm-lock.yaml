@@ -199,6 +199,9 @@ importers:
       '@nexora/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nexora/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@nexora/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -284,6 +287,9 @@ importers:
       '@nexora/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nexora/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@nexora/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -366,9 +372,6 @@ importers:
       better-auth:
         specifier: 1.7.5
         version: 1.7.5(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3))(mysql2@3.15.3)(next@16.3.5(@playwright/test@1.63.0)(@types/node@24.13.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.11)
-      react:
-        specifier: ^19.0.0
-        version: 19.3.0
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -379,6 +382,12 @@ importers:
       eslint:
         specifier: ^9.39.1
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      next:
+        specifier: 16.3.5
+        version: 16.3.5(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.63.0)(@types/node@24.13.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
