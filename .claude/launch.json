@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "platform",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": [
+        "C:/Users/alici/AppData/Roaming/npm/node_modules/pnpm/bin/pnpm.mjs",
+        "--filter",
+        "@nexora/platform",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "cpq",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": [
+        "C:/Users/alici/AppData/Roaming/npm/node_modules/pnpm/bin/pnpm.mjs",
+        "--filter",
+        "@nexora/cpq",
+        "dev"
+      ],
+      "port": 3001
+    }
+  ]
+}

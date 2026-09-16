@@ -77,6 +77,41 @@ async function main(): Promise<void> {
 
   const locations = await prisma.customerLocation.count();
   console.log(`\n  Locations: ${locations}`);
+
+  /*
+   * Credential sanity.
+   *
+   * Better Auth looks a credential up with
+   *   providerId === 'credential' && accountId === user.id
+   * so an account row keyed by email authenticates against nothing. That was a
+   * real seeding bug here, and it is invisible until someone tries to sign in —
+   * which is exactly why it is asserted rather than assumed.
+   */
+  const accounts = await prisma.account.findMany({
+    select: {
+      accountId: true,
+      userId: true,
+      providerId: true,
+      password: true,
+      user: { select: { email: true, role: true } },
+    },
+    orderBy: { user: { email: 'asc' } },
+  });
+
+  console.log('\n  Sign-in credentials:');
+  let credentialsOk = true;
+  for (const account of accounts) {
+    const keyedCorrectly = account.accountId === account.userId;
+    const hasHash = Boolean(account.password);
+    const ok = account.providerId === 'credential' && keyedCorrectly && hasHash;
+    if (!ok) credentialsOk = false;
+    console.log(
+      `    ${ok ? 'OK  ' : 'FAIL'} ${account.user.email.padEnd(28)} ${account.user.role}`,
+    );
+  }
+  if (!credentialsOk) {
+    throw new Error('At least one account cannot be authenticated against.');
+  }
 }
 
 main()

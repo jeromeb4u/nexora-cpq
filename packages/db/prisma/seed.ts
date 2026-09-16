@@ -153,17 +153,24 @@ async function seedUsers(): Promise<Map<string, User>> {
         jobTitle: spec.jobTitle,
         isActive: true,
         createdAt: daysAgo(NOW, 400),
-        accounts: {
-          create: {
-            // Better Auth stores email/password credentials as an account row
-            // with providerId 'credential' and the hash in `password`.
-            providerId: 'credential',
-            accountId: spec.email,
-            password: passwordHash,
-          },
-        },
       },
     });
+
+    // Better Auth stores email/password credentials as a separate account row.
+    // `accountId` MUST equal the user's own id: sign-in looks the credential up
+    // with `providerId === 'credential' && accountId === user.id`, so seeding
+    // the email here produces an account that can never be authenticated
+    // against. It is created after the user because the id does not exist until
+    // the user row does.
+    await prisma.account.create({
+      data: {
+        userId: user.id,
+        providerId: 'credential',
+        accountId: user.id,
+        password: passwordHash,
+      },
+    });
+
     byEmail.set(spec.email, user);
   }
 
