@@ -1,0 +1,232 @@
+/* ---------------------------------------------------------------------------
+ * Nexora Telecom — design tokens (Tailwind v4, CSS-first)
+ *
+ * Design intent: a restrained enterprise product. Dense, legible, calm.
+ * One serious brand blue used sparingly for action and focus; everything else
+ * carries meaning through a neutral scale and a small set of status hues.
+ * No gradients, no glow, no decorative colour. Contrast targets WCAG AA
+ * (4.5:1 body text, 3:1 large text and UI boundaries).
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  /* --- Neutral scale -------------------------------------------------- */
+  /* Slightly cool grays; reads as "software", not "paper". */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fcfcfd;
+  --color-neutral-50: #f8f9fb;
+  --color-neutral-100: #f1f3f7;
+  --color-neutral-200: #e3e7ee;
+  --color-neutral-300: #cdd4e0;
+  --color-neutral-400: #9aa4b8;
+  --color-neutral-500: #6b7689;
+  --color-neutral-600: #4d5768;
+  --color-neutral-700: #39414f;
+  --color-neutral-800: #252c37;
+  --color-neutral-900: #171c24;
+  --color-neutral-950: #0d1117;
+
+  /* --- Brand ---------------------------------------------------------- */
+  /* Nexora blue. 600 on white = 5.9:1. 700 for hover/pressed. */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dce7ff;
+  --color-brand-200: #bfd3ff;
+  --color-brand-300: #93b4ff;
+  --color-brand-400: #608cfb;
+  --color-brand-500: #3b66f0;
+  --color-brand-600: #2449d6;
+  --color-brand-700: #1d39ac;
+  --color-brand-800: #1c3389;
+  --color-brand-900: #1c2f6d;
+
+  /* --- Status --------------------------------------------------------- */
+  /* Used for quote states, validation severity and serviceability. */
+  --color-success-50: #ecfdf3;
+  --color-success-200: #a9efc5;
+  --color-success-600: #067647;
+  --color-success-700: #055c38;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-200: #fedf89;
+  --color-warning-600: #b54708;
+  --color-warning-700: #93370d;
+
+  --color-danger-50: #fef3f2;
+  --color-danger-200: #fecdca;
+  --color-danger-600: #b42318;
+  --color-danger-700: #912018;
+
+  --color-info-50: #eff8ff;
+  --color-info-200: #b2ddff;
+  --color-info-600: #175cd3;
+  --color-info-700: #1849a9;
+
+  /* --- Typography ----------------------------------------------------- */
+  --font-sans:
+    "InterVariable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-2xs: 0.6875rem; /* 11px — table meta, badges */
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.8125rem; /* 13px — the enterprise workhorse size */
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem; /* 14px — body */
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.125rem;
+  --text-xl--line-height: 1.625rem;
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.25rem;
+
+  /* --- Radius / elevation --------------------------------------------- */
+  /* Small radii read as "tool", large radii read as "consumer app". */
+  --radius-xs: 0.1875rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(16 24 40 / 0.1), 0 1px 2px -1px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
+
+  /* --- Layout --------------------------------------------------------- */
+  --spacing-sidebar: 15rem;
+  --spacing-sidebar-collapsed: 3.5rem;
+  --spacing-topbar: 3.25rem;
+  --spacing-content-max: 90rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Semantic layer.
+ * Components reference these, never raw scale values, so theming stays in
+ * one place. Light is the committed default for an enterprise tool; dark is
+ * supported for operators who prefer it.
+ * ------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --surface-canvas: var(--color-neutral-50);
+    --surface-raised: var(--color-neutral-0);
+    --surface-sunken: var(--color-neutral-100);
+    --surface-overlay: var(--color-neutral-0);
+    --surface-hover: var(--color-neutral-100);
+    --surface-selected: var(--color-brand-50);
+
+    --border-subtle: var(--color-neutral-200);
+    --border-default: var(--color-neutral-300);
+    --border-strong: var(--color-neutral-400);
+
+    --text-primary: var(--color-neutral-900);
+    --text-secondary: var(--color-neutral-600);
+    --text-tertiary: var(--color-neutral-500);
+    --text-inverse: var(--color-neutral-0);
+    --text-link: var(--color-brand-600);
+
+    --accent-solid: var(--color-brand-600);
+    --accent-solid-hover: var(--color-brand-700);
+    --accent-subtle: var(--color-brand-50);
+    --accent-border: var(--color-brand-200);
+
+    --focus-ring: var(--color-brand-500);
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface-canvas: var(--color-neutral-950);
+      --surface-raised: var(--color-neutral-900);
+      --surface-sunken: var(--color-neutral-950);
+      --surface-overlay: var(--color-neutral-800);
+      --surface-hover: var(--color-neutral-800);
+      --surface-selected: var(--color-brand-900);
+
+      --border-subtle: var(--color-neutral-800);
+      --border-default: var(--color-neutral-700);
+      --border-strong: var(--color-neutral-600);
+
+      --text-primary: var(--color-neutral-50);
+      --text-secondary: var(--color-neutral-300);
+      --text-tertiary: var(--color-neutral-400);
+      --text-inverse: var(--color-neutral-950);
+      --text-link: var(--color-brand-300);
+
+      --accent-solid: var(--color-brand-500);
+      --accent-solid-hover: var(--color-brand-400);
+      --accent-subtle: var(--color-brand-900);
+      --accent-border: var(--color-brand-800);
+
+      --focus-ring: var(--color-brand-400);
+
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --surface-canvas: var(--color-neutral-950);
+    --surface-raised: var(--color-neutral-900);
+    --surface-sunken: var(--color-neutral-950);
+    --surface-overlay: var(--color-neutral-800);
+    --surface-hover: var(--color-neutral-800);
+    --surface-selected: var(--color-brand-900);
+
+    --border-subtle: var(--color-neutral-800);
+    --border-default: var(--color-neutral-700);
+    --border-strong: var(--color-neutral-600);
+
+    --text-primary: var(--color-neutral-50);
+    --text-secondary: var(--color-neutral-300);
+    --text-tertiary: var(--color-neutral-400);
+    --text-inverse: var(--color-neutral-950);
+    --text-link: var(--color-brand-300);
+
+    --accent-solid: var(--color-brand-500);
+    --accent-solid-hover: var(--color-brand-400);
+    --accent-subtle: var(--color-brand-900);
+    --accent-border: var(--color-brand-800);
+
+    --focus-ring: var(--color-brand-400);
+
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--surface-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Money and identifiers must align in dense tables. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* One consistent, visible focus treatment everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

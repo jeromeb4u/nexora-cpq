@@ -1,0 +1,641 @@
+// ---------------------------------------------------------------------------
+// Nexora Telecom — CPQ data model
+//
+// Modelling principles applied here:
+//   * Enumerated values are Postgres enums, mirroring packages/types/src/enums.ts.
+//     A test in this package fails if the two ever drift.
+//   * Money is stored as integer euro cents (Int). No Float, no Decimal —
+//     see packages/types/src/money.ts for why.
+//   * Quote history is append-only: a QuoteVersion and its items are never
+//     mutated once superseded, so a sent quote can always be reproduced.
+//   * Compatibility rules are relational rows, not code and not JSON blobs,
+//     so PRICING_ADMIN can author them and Postgres enforces the product FKs.
+//   * JSON appears in exactly two places, both genuinely schemaless:
+//     the configuration snapshot on a version, and audit metadata.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7 no longer accepts connection URLs in the schema. The CLI reads the
+// direct (unpooled) URL from prisma.config.ts; the runtime client supplies the
+// pooled URL through a driver adapter. See packages/db/src/client.ts.
+datasource db {
+  provider = "postgresql"
+}
+
+// ===========================================================================
+// Enums
+// ===========================================================================
+
+enum Role {
+  SALES_REP
+  SALES_MANAGER
+  PRICING_ADMIN
+  ADMIN
+}
+
+enum CustomerStatus {
+  PROSPECT
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum Industry {
+  MANUFACTURING
+  FINANCIAL_SERVICES
+  HEALTHCARE
+  RETAIL
+  LOGISTICS
+  PUBLIC_SECTOR
+  TECHNOLOGY
+  ENERGY_UTILITIES
+  PROFESSIONAL_SERVICES
+  EDUCATION
+}
+
+enum Serviceability {
+  AVAILABLE
+  LIMITED
+  UNAVAILABLE
+  PENDING_CHECK
+}
+
+enum ProductCategory {
+  CONNECTIVITY
+  SD_WAN
+  SECURITY
+  HARDWARE
+  VOICE
+  SUPPORT
+}
+
+enum PricingModel {
+  PER_UNIT
+  FLAT
+  PER_SITE
+}
+
+enum RuleType {
+  REQUIRES
+  INCOMPATIBLE
+  RECOMMENDS
+  MUTUALLY_EXCLUSIVE
+  MIN_CONTRACT_TERM
+  REQUIRES_SERVICEABILITY
+}
+
+enum RuleTriggerKind {
+  PRODUCT_SELECTED
+  CATEGORY_SELECTED
+  BANDWIDTH_AT_LEAST
+  CONTRACT_TERM_AT_LEAST
+  ALWAYS
+}
+
+enum RuleEffectKind {
+  REQUIRES_PRODUCT
+  REQUIRES_ONE_OF
+  INCOMPATIBLE_WITH_PRODUCT
+  RECOMMENDS_PRODUCT
+  AT_MOST_ONE_OF
+  MIN_CONTRACT_MONTHS
+  MIN_SERVICEABILITY
+}
+
+enum ValidationSeverity {
+  ERROR
+  WARNING
+  REQUIRED
+  RECOMMENDATION
+  INFORMATION
+}
+
+enum QuoteStatus {
+  DRAFT
+  CONFIGURING
+  READY_FOR_REVIEW
+  APPROVAL_REQUIRED
+  APPROVED
+  REJECTED
+  SENT_TO_CUSTOMER
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+enum ApprovalDecision {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalReason {
+  DISCOUNT_EXCEEDS_THRESHOLD
+  CONTRACT_VALUE_THRESHOLD
+  NON_STANDARD_TERM
+  MANUAL_ESCALATION
+}
+
+enum AuditAction {
+  CUSTOMER_CREATED
+  CUSTOMER_UPDATED
+  LOCATION_CREATED
+  LOCATION_UPDATED
+  QUOTE_CREATED
+  QUOTE_UPDATED
+  QUOTE_STATUS_CHANGED
+  QUOTE_VERSION_CREATED
+  QUOTE_VERSION_RESTORED
+  PRODUCT_ADDED
+  PRODUCT_REMOVED
+  DISCOUNT_CHANGED
+  APPROVAL_REQUESTED
+  APPROVAL_GRANTED
+  APPROVAL_REJECTED
+  QUOTE_SENT
+  QUOTE_DOCUMENT_GENERATED
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  AUTH_SIGNED_IN
+  AUTH_SIGN_IN_FAILED
+  AUTH_SIGNED_OUT
+  ACCESS_DENIED
+}
+
+enum AuditEntity {
+  CUSTOMER
+  CUSTOMER_LOCATION
+  QUOTE
+  QUOTE_VERSION
+  QUOTE_ITEM
+  QUOTE_APPROVAL
+  PRODUCT
+  USER
+}
+
+enum NotificationType {
+  APPROVAL_REQUESTED
+  APPROVAL_GRANTED
+  APPROVAL_REJECTED
+  QUOTE_ACCEPTED
+  QUOTE_EXPIRING
+}
+
+// ===========================================================================
+// Authentication (Better Auth core schema + Nexora's `role` field)
+// ===========================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Nexora extension. Authorization is derived from this server-side only.
+  role     Role    @default(SALES_REP)
+  jobTitle String?
+  // Sales reps roll up to a manager; used for "view team quotes".
+  managerId String?
+  manager   User?   @relation("TeamHierarchy", fields: [managerId], references: [id], onDelete: SetNull)
+  reports   User[]  @relation("TeamHierarchy")
+  isActive  Boolean @default(true)
+
+  sessions          Session[]
+  accounts          Account[]
+  ownedCustomers    Customer[]      @relation("AccountOwner")
+  ownedQuotes       Quote[]         @relation("QuoteOwner")
+  createdVersions   QuoteVersion[]  @relation("VersionAuthor")
+  requestedApprovals QuoteApproval[] @relation("ApprovalRequester")
+  decidedApprovals  QuoteApproval[] @relation("ApprovalDecider")
+  auditEvents       AuditEvent[]
+  notifications     Notification[]
+
+  @@index([role])
+  @@index([managerId])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ===========================================================================
+// Customer domain
+// ===========================================================================
+
+model Customer {
+  id          String         @id @default(cuid())
+  companyName String
+  legalName   String
+  industry    Industry
+  vatNumber   String         @unique
+  status      CustomerStatus @default(PROSPECT)
+  email       String
+  phone       String
+  website     String?
+  notes       String?
+
+  accountOwnerId String
+  accountOwner   User   @relation("AccountOwner", fields: [accountOwnerId], references: [id], onDelete: Restrict)
+
+  locations CustomerLocation[]
+  quotes    Quote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountOwnerId])
+  @@index([status])
+  @@index([industry])
+  // Supports the customer list's default ordering and keyset pagination.
+  @@index([companyName])
+  @@map("customer")
+}
+
+model CustomerLocation {
+  id             String         @id @default(cuid())
+  name           String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  postalCode     String
+  country        String         @default("DE")
+  contactName    String
+  contactEmail   String
+  contactPhone   String?
+  /// Free-text description of what is already installed at the site.
+  existingConnectivity String?
+  serviceability Serviceability @default(PENDING_CHECK)
+  /// Highest bandwidth (Mbps) deliverable here. Null when unknown/unavailable.
+  maxBandwidthMbps Int?
+  isPrimary      Boolean        @default(false)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  quotes Quote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([serviceability])
+  @@map("customer_location")
+}
+
+// ===========================================================================
+// Product catalogue
+// ===========================================================================
+
+model Product {
+  id          String          @id @default(cuid())
+  sku         String          @unique
+  name        String
+  description String
+  category    ProductCategory
+
+  /// Monthly recurring price, in euro cents.
+  monthlyPriceCents Int
+  /// One-time setup price, in euro cents.
+  setupPriceCents   Int
+  pricingModel      PricingModel @default(FLAT)
+
+  minContractMonths Int @default(12)
+  /// Maximum discount permitted on this product, in basis points (2500 = 25%).
+  /// Basis points keep the ceiling an exact integer, like every other rate here.
+  maxDiscountBps    Int @default(2000)
+
+  /// Bandwidth for CONNECTIVITY products; null for everything else.
+  bandwidthMbps Int?
+
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  quoteItems     QuoteItem[]
+  triggerRules   ProductRule[]       @relation("RuleTriggerProduct")
+  effectRules    ProductRule[]       @relation("RuleEffectProduct")
+  ruleTargets    ProductRuleTarget[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, isActive])
+  @@index([isActive, sortOrder])
+  @@map("product")
+}
+
+/// A declarative compatibility rule. See docs/CPQ-RULES.md.
+///
+/// `triggerThreshold` carries Mbps for BANDWIDTH_AT_LEAST and months for
+/// CONTRACT_TERM_AT_LEAST; which one it means is determined by `triggerKind`.
+/// The same applies to `effectThreshold` (months). This keeps the table
+/// relational without one nullable column per variant.
+model ProductRule {
+  id       String             @id @default(cuid())
+  type     RuleType
+  severity ValidationSeverity @default(ERROR)
+  message  String
+  /// Lower runs first; ties broken by id so evaluation is deterministic.
+  priority Int                @default(100)
+  isActive Boolean            @default(true)
+
+  triggerKind      RuleTriggerKind
+  triggerProductId String?
+  triggerProduct   Product?         @relation("RuleTriggerProduct", fields: [triggerProductId], references: [id], onDelete: Cascade)
+  triggerCategory  ProductCategory?
+  triggerThreshold Int?
+
+  effectKind           RuleEffectKind
+  effectProductId      String?
+  effectProduct        Product?        @relation("RuleEffectProduct", fields: [effectProductId], references: [id], onDelete: Cascade)
+  effectThreshold      Int?
+  effectServiceability Serviceability?
+
+  /// Targets for the set-valued effects (REQUIRES_ONE_OF, AT_MOST_ONE_OF).
+  targets ProductRuleTarget[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, priority])
+  @@index([triggerProductId])
+  @@index([effectProductId])
+  @@map("product_rule")
+}
+
+model ProductRuleTarget {
+  ruleId    String
+  rule      ProductRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([ruleId, productId])
+  @@index([productId])
+  @@map("product_rule_target")
+}
+
+// ===========================================================================
+// Quotes
+// ===========================================================================
+
+/// The commercial object. Identity, ownership and lifecycle live here;
+/// everything that can change between revisions lives on QuoteVersion.
+model Quote {
+  id          String      @id @default(cuid())
+  /// Human-facing reference, e.g. "QT-10482".
+  quoteNumber String      @unique
+  status      QuoteStatus @default(DRAFT)
+  title       String?
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  locationId String?
+  location   CustomerLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  ownerId String
+  owner   User   @relation("QuoteOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  /// The version currently in play. Older versions remain readable forever.
+  currentVersionId String?       @unique
+  currentVersion   QuoteVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+
+  versions  QuoteVersion[] @relation("QuoteVersions")
+  approvals QuoteApproval[]
+
+  validUntil DateTime?
+  sentAt     DateTime?
+  acceptedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId, status])
+  @@index([customerId])
+  @@index([status, updatedAt])
+  @@index([updatedAt])
+  @@map("quote")
+}
+
+/// An immutable-once-superseded revision of a quote's configuration and price.
+///
+/// Every monetary field here is server-computed (§33). The client never writes
+/// them; it sends selections and a requested discount, and the server recomputes.
+model QuoteVersion {
+  id            String @id @default(cuid())
+  versionNumber Int
+
+  quoteId String
+  quote   Quote  @relation("QuoteVersions", fields: [quoteId], references: [id], onDelete: Cascade)
+
+  contractMonths Int @default(36)
+  /// Requested discount in basis points (1800 = 18%).
+  discountBps    Int @default(0)
+  /// Why the rep asked for this discount. Shown to approvers.
+  discountReason String?
+
+  // --- Server-computed pricing, all in euro cents ------------------------
+  grossMonthlyCents    Int @default(0)
+  grossSetupCents      Int @default(0)
+  discountMonthlyCents Int @default(0)
+  mrrCents             Int @default(0)
+  otcCents             Int @default(0)
+  tcvCents             Int @default(0)
+  /// Effective blended discount actually applied, in basis points.
+  effectiveDiscountBps Int @default(0)
+
+  /// Flexible snapshot of the configuration as evaluated: rule findings,
+  /// applied automatic discounts, and the catalogue prices used. Genuinely
+  /// schemaless, and deliberately frozen so an old version reprices identically.
+  configSnapshot Json?
+
+  /// Set when this version stops being the live one. Null for the current version.
+  supersededAt DateTime?
+
+  createdById String
+  createdBy   User   @relation("VersionAuthor", fields: [createdById], references: [id], onDelete: Restrict)
+
+  items     QuoteItem[]
+  approvals QuoteApproval[]
+  currentOf Quote?          @relation("CurrentVersion")
+
+  createdAt DateTime @default(now())
+
+  @@unique([quoteId, versionNumber])
+  @@index([quoteId])
+  @@map("quote_version")
+}
+
+/// A priced line on a specific quote version.
+///
+/// Prices are copied from the catalogue at the moment the version is created.
+/// A later catalogue price change must never silently alter an issued quote.
+model QuoteItem {
+  id String @id @default(cuid())
+
+  quoteVersionId String
+  quoteVersion   QuoteVersion @relation(fields: [quoteVersionId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  quantity Int @default(1)
+
+  // --- Price snapshot, euro cents ----------------------------------------
+  unitMonthlyCents Int
+  unitSetupCents   Int
+  monthlyCents     Int
+  setupCents       Int
+
+  /// Denormalised for the PDF and for history: the catalogue row may change.
+  skuSnapshot  String
+  nameSnapshot String
+
+  sortOrder Int @default(0)
+
+  @@unique([quoteVersionId, productId])
+  @@index([quoteVersionId])
+  @@index([productId])
+  @@map("quote_item")
+}
+
+/// An escalation raised against a specific version of a quote.
+/// Bound to the version, not the quote: approving v2 must not approve v3.
+model QuoteApproval {
+  id String @id @default(cuid())
+
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  quoteVersionId String
+  quoteVersion   QuoteVersion @relation(fields: [quoteVersionId], references: [id], onDelete: Cascade)
+
+  decision ApprovalDecision @default(PENDING)
+  reason   ApprovalReason
+
+  /// Snapshot of what was requested, so the record survives threshold changes.
+  requestedDiscountBps Int
+  allowedDiscountBps   Int
+  mrrCentsSnapshot     Int
+
+  /// Justification supplied by the requester.
+  justification String
+  /// Mandatory when decision = REJECTED.
+  decisionNote  String?
+
+  requestedById String
+  requestedBy   User   @relation("ApprovalRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+
+  decidedById String?
+  decidedBy   User?   @relation("ApprovalDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([decision, createdAt])
+  @@index([quoteId])
+  @@index([quoteVersionId])
+  @@map("quote_approval")
+}
+
+// ===========================================================================
+// Audit & notifications
+// ===========================================================================
+
+/// Append-only. Rows are never updated or deleted.
+model AuditEvent {
+  id       String      @id @default(cuid())
+  action   AuditAction
+  entity   AuditEntity
+  entityId String
+
+  /// Null for system-generated events (e.g. expiry sweeps).
+  actorId String?
+  actor   User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  /// Short human-readable summary, e.g. "Discount changed 12% -> 18%".
+  summary String
+
+  /// Structured detail: before/after values, ids. Never credentials or PII
+  /// beyond what the actor already had access to (docs/SECURITY.md).
+  metadata Json?
+
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
+  @@map("audit_event")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  type    NotificationType
+  title   String
+  body    String
+  /// Deep link into the app, e.g. "/quotes/abc123".
+  href    String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+  @@map("notification")
+}

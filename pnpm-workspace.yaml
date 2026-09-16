@@ -1,0 +1,18 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Next.js 16 / React 19 must resolve to a single copy across every workspace
+# package, otherwise hooks and context break across the MFE boundary.
+publicHoistPattern:
+  - "*eslint*"
+  - "*prettier*"
+
+# Postinstall scripts are blocked by default (supply-chain hardening).
+# Only these three genuinely need to run:
+#   @prisma/engines / prisma — download the platform query-engine binary
+#   esbuild                  — downloads its native binary
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
