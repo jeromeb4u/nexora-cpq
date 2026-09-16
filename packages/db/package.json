@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "@nexora/config": "workspace:*",
+    "@nexora/cpq-engine": "workspace:*",
+    "better-auth": "1.7.5",
     "eslint": "^9.39.1",
     "prisma": "7.10.0",
     "tsx": "^4.20.6",
