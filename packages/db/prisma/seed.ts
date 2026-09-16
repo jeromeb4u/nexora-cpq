@@ -1,9 +1,5 @@
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-import { config as loadEnv } from 'dotenv';
-
-const packageDir = dirname(fileURLToPath(import.meta.url));
-loadEnv({ path: resolve(packageDir, '../../../.env'), quiet: true });
+// MUST be first: populates process.env before any other module body runs.
+import './load-env';
 
 import { hashPassword } from 'better-auth/crypto';
 import {
@@ -552,6 +548,19 @@ const CUSTOMER_SPECS: readonly SeedCustomerSpec[] = [
         maxBandwidthMbps: 10_000,
         existingConnectivity: '1 Gbps symmetric fibre.',
         isPrimary: true,
+      },
+      {
+        name: 'Leipzig Support Office',
+        addressLine1: 'Katharinenstraße 17',
+        city: 'Leipzig',
+        postalCode: '04109',
+        country: 'DE',
+        contactName: 'Hanna Lorenz',
+        contactEmail: 'h.lorenz@lumensoftware.demo',
+        serviceability: 'LIMITED',
+        maxBandwidthMbps: 500,
+        existingConnectivity: 'Shared 250 Mbps in a serviced building.',
+        isPrimary: false,
       },
     ],
   },

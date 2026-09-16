@@ -27,10 +27,17 @@ import { termDiscountFor } from './policy';
  *
  * Order of operations is fixed and deliberate:
  *   1. line subtotals   (unit price × quantity, per the product's pricing model)
- *   2. gross totals     (sum of lines)
- *   3. discounts        (automatic, then the manually requested rate)
- *   4. MRR / OTC        (gross − discount)
- *   5. TCV              (MRR × term + OTC)
+ *   2. per-line discount (term first, then negotiated, each clamped by the
+ *      product's own ceiling)
+ *   3. totals           (gross − discount)
+ *   4. TCV              (MRR × term + OTC)
+ *
+ * **Discount ceilings are per line, not per bundle.** A router capped at 10%
+ * sitting in a quote negotiated at 18% receives 10% while every other line
+ * receives 18%. Capping the whole bundle at the least flexible product's
+ * ceiling — the obvious-looking simplification — is commercially wrong: it
+ * would make almost every mixed hardware/service quote undiscountable, and it
+ * silently produces identical totals for different requested discounts.
  *
  * Discounts apply to recurring charges only. Setup fees are cost recovery and
  * are not discountable at Nexora — a deliberate policy choice, documented in
@@ -58,13 +65,53 @@ function billableQuantity(
   }
 }
 
-/** Build the priced line items for a configuration. */
+/** How a single line's discount splits between automatic and negotiated. */
+interface LineRates {
+  readonly termPortion: number;
+  readonly manualPortion: number;
+  readonly total: number;
+  readonly capped: boolean;
+}
+
+/**
+ * Resolve the rates that actually apply to one product.
+ *
+ * The term discount is attributed first because it is automatic and
+ * unconditional; the negotiated discount then fills whatever headroom the
+ * product's ceiling still leaves.
+ */
+function resolveLineRates(
+  product: ProductSnapshot,
+  termRate: number,
+  manualRate: number,
+): LineRates {
+  const ceiling = Math.max(0, product.maxDiscountRate);
+  const termPortion = Math.min(Math.max(0, termRate), ceiling);
+  const manualPortion = Math.min(Math.max(0, manualRate), Math.max(0, ceiling - termPortion));
+
+  return {
+    termPortion,
+    manualPortion,
+    total: termPortion + manualPortion,
+    capped: Math.max(0, termRate) + Math.max(0, manualRate) > ceiling,
+  };
+}
+
+/**
+ * Build the priced line items for a configuration.
+ *
+ * Exported for the configurator's live preview, which shows line-level pricing
+ * before a full breakdown is requested.
+ */
 export function buildPriceLines(
   input: ConfigurationInput,
   catalogue: readonly ProductSnapshot[],
+  rates: { readonly termRate: number; readonly manualRate: number } = {
+    termRate: 0,
+    manualRate: 0,
+  },
 ): readonly PriceLine[] {
   const products = new Map(catalogue.map((product) => [product.id, product]));
-
   const lines: PriceLine[] = [];
 
   for (const selection of input.selections) {
@@ -74,6 +121,8 @@ export function buildPriceLines(
     if (!product) continue;
 
     const quantity = billableQuantity(product, selection.quantity, input.siteCount);
+    const monthlySubtotal = multiply(product.monthlyPrice, quantity);
+    const lineRates = resolveLineRates(product, rates.termRate, rates.manualRate);
 
     lines.push({
       productId: product.id,
@@ -83,8 +132,18 @@ export function buildPriceLines(
       quantity,
       unitMonthlyPrice: product.monthlyPrice,
       unitSetupPrice: product.setupPrice,
-      monthlySubtotal: multiply(product.monthlyPrice, quantity),
+      monthlySubtotal,
       setupSubtotal: multiply(product.setupPrice, quantity),
+      appliedDiscountRate: lineRates.total,
+      // Sum the two ROUNDED portions rather than rounding the combined rate.
+      // Rounding once at the end can differ by a cent from rounding each part,
+      // which would leave the customer-facing breakdown not adding up to the
+      // total. Reconciliation matters more here than a cent of precision.
+      discountAmount: cents(
+        applyRate(monthlySubtotal, lineRates.termPortion) +
+          applyRate(monthlySubtotal, lineRates.manualPortion),
+      ),
+      discountCapped: lineRates.capped,
     });
   }
 
@@ -95,34 +154,13 @@ export function buildPriceLines(
     .sort((a, b) => (order.get(a.productId) ?? 0) - (order.get(b.productId) ?? 0));
 }
 
-/**
- * Automatic discounts the configuration qualifies for without anyone asking —
- * currently term commitment only. These stack additively with the manual
- * discount, but the combined rate is still subject to the policy ceiling, which
- * the discount engine enforces before this function is called.
- */
-function automaticDiscounts(input: ConfigurationInput, grossMonthly: Cents): AppliedDiscount[] {
-  const term = termDiscountFor(input.contractMonths);
-  if (!term) return [];
-
-  return [
-    {
-      code: term.code,
-      label: term.label,
-      rate: term.rate,
-      amount: applyRate(grossMonthly, term.rate),
-      automatic: true,
-    },
-  ];
-}
-
 export interface PriceInput {
   readonly configuration: ConfigurationInput;
   readonly catalogue: readonly ProductSnapshot[];
   /**
-   * The manual discount rate (0..1) that policy has already approved.
-   * Callers MUST pass the clamped rate from the discount engine, never the
-   * raw rate a client requested.
+   * The negotiated discount rate (0..1) that policy has already approved.
+   * Callers MUST pass the rate from the discount engine, never the raw rate a
+   * client requested.
    */
   readonly approvedManualRate: number;
 }
@@ -136,30 +174,50 @@ export interface PriceInput {
 export function calculatePrice(input: PriceInput): PriceBreakdown {
   const { configuration, catalogue, approvedManualRate } = input;
 
-  const lines = buildPriceLines(configuration, catalogue);
+  const term = termDiscountFor(configuration.contractMonths);
+  const termRate = term?.rate ?? 0;
+  const manualRate = Math.max(0, approvedManualRate);
+
+  const lines = buildPriceLines(configuration, catalogue, { termRate, manualRate });
 
   const grossMonthly = add(...lines.map((line) => line.monthlySubtotal));
   const grossSetup = add(...lines.map((line) => line.setupSubtotal));
 
-  const discounts: AppliedDiscount[] = automaticDiscounts(configuration, grossMonthly);
+  // Sum the individually rounded line discounts rather than rounding a total
+  // rate, so the line-by-line breakdown the customer sees always adds up.
+  const discountMonthly = add(...lines.map((line) => line.discountAmount));
 
-  if (approvedManualRate > 0) {
+  // Attribute the total across the two discount sources for the breakdown.
+  const products = new Map(catalogue.map((product) => [product.id, product]));
+  let termAmount = 0;
+  let manualAmount = 0;
+
+  for (const line of lines) {
+    const product = products.get(line.productId);
+    if (!product) continue;
+    const lineRates = resolveLineRates(product, termRate, manualRate);
+    termAmount += applyRate(line.monthlySubtotal, lineRates.termPortion);
+    manualAmount += applyRate(line.monthlySubtotal, lineRates.manualPortion);
+  }
+
+  const discounts: AppliedDiscount[] = [];
+  if (term && termAmount > 0) {
+    discounts.push({
+      code: term.code,
+      label: term.label,
+      rate: term.rate,
+      amount: cents(termAmount),
+      automatic: true,
+    });
+  }
+  if (manualRate > 0 && manualAmount > 0) {
     discounts.push({
       code: 'MANUAL',
       label: 'Negotiated discount',
-      rate: approvedManualRate,
-      amount: applyRate(grossMonthly, approvedManualRate),
+      rate: manualRate,
+      amount: cents(manualAmount),
       automatic: false,
     });
-  }
-
-  // Sum the individual rounded amounts rather than rounding the summed rate, so
-  // the line-by-line breakdown the customer sees always adds up to the total.
-  let discountMonthly = add(...discounts.map((discount) => discount.amount));
-
-  // A configuration can never be discounted below zero.
-  if (discountMonthly > grossMonthly) {
-    discountMonthly = grossMonthly;
   }
 
   const mrr = subtract(grossMonthly, discountMonthly);
@@ -181,7 +239,9 @@ export function calculatePrice(input: PriceInput): PriceBreakdown {
 }
 
 /** An empty breakdown, for a quote with nothing configured yet. */
-export function emptyPriceBreakdown(contractMonths: PriceBreakdown['contractMonths']): PriceBreakdown {
+export function emptyPriceBreakdown(
+  contractMonths: PriceBreakdown['contractMonths'],
+): PriceBreakdown {
   return {
     lines: [],
     grossMonthly: ZERO,
@@ -204,7 +264,9 @@ export function emptyPriceBreakdown(contractMonths: PriceBreakdown['contractMont
  */
 export function totalContractValue(mrr: Cents, contractMonths: number, otc: Cents): Cents {
   if (!Number.isInteger(contractMonths) || contractMonths <= 0) {
-    throw new RangeError(`Contract term must be a positive whole number of months, received ${contractMonths}`);
+    throw new RangeError(
+      `Contract term must be a positive whole number of months, received ${contractMonths}`,
+    );
   }
   return cents(mrr * contractMonths + otc);
 }

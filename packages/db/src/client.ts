@@ -1,5 +1,3 @@
-import 'server-only';
-
 import { PrismaNeon } from '@prisma/adapter-neon';
 
 import { PrismaClient } from './generated/prisma/client';
@@ -7,10 +5,14 @@ import { PrismaClient } from './generated/prisma/client';
 /**
  * The Prisma client singleton.
  *
- * `server-only` is imported at the top so that any accidental import of this
- * module from a Client Component fails the build rather than shipping database
- * credentials to the browser. That guarantee is worth more than the one line
- * it costs.
+ * The `server-only` guard lives on the package entry point (src/index.ts)
+ * rather than here, and `./client` is deliberately not a public subpath export.
+ * Apps can therefore only reach this module through the guarded entry, so an
+ * accidental import from a Client Component still fails the build instead of
+ * shipping database credentials to the browser — while the seed script, which
+ * runs in plain Node outside Next's bundler, can import this file directly.
+ * `server-only` throws under a normal Node resolver, so guarding this file
+ * would have made the database unseedable.
  *
  * Connection strategy (Prisma 7 + Neon):
  *   - The runtime uses the POOLED url through the Neon serverless driver

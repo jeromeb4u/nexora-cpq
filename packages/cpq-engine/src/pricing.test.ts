@@ -158,20 +158,81 @@ describe('pricing engine', () => {
       expect(result.mrr).toBe(result.grossMonthly);
     });
 
-    it('never discounts a configuration below zero', () => {
+    it('clamps an absurd rate to each product’s own ceiling', () => {
       const result = calculatePrice({
         configuration: configuration({
           contractMonths: 60,
           selections: [{ productId: FIB_100.id, quantity: 1 }],
         }),
         catalogue: CATALOGUE,
-        // Absurd rate: the clamp, not the caller, is what protects the total.
+        // The per-line ceiling, not the caller, is what protects the total.
         approvedManualRate: 5,
       });
 
-      expect(result.discountMonthly).toBe(result.grossMonthly);
-      expect(result.mrr).toBe(cents(0));
-      expect(result.tcv).toBe(result.otc);
+      // FIB-100 caps at 20%; 60 months contributes 8% automatically.
+      expect(result.lines[0]?.appliedDiscountRate).toBeCloseTo(0.2, 5);
+      expect(result.lines[0]?.discountCapped).toBe(true);
+      expect(result.discountMonthly).toBe(cents(5_980)); // 20% of 29 900
+      expect(result.mrr).toBe(cents(23_920));
+      expect(result.mrr).toBeGreaterThan(0);
+    });
+
+    /*
+     * Regression: discount ceilings are PER LINE, not per bundle.
+     *
+     * An earlier version capped the whole quote at the tightest product ceiling
+     * in it. That made any bundle containing hardware effectively
+     * undiscountable, and — the symptom that exposed it — produced byte
+     * identical totals for two different requested discounts.
+     */
+    it('caps only the line whose product is restricted', () => {
+      const result = calculatePrice({
+        configuration: configuration({
+          contractMonths: 24, // 2% automatic, keeps the arithmetic legible
+          selections: [
+            { productId: FIB_1G.id, quantity: 1 }, // ceiling 20%
+            { productId: MANAGED_ROUTER.id, quantity: 1 }, // ceiling 10%
+          ],
+        }),
+        catalogue: CATALOGUE,
+        approvedManualRate: 0.18,
+      });
+
+      const fibre = result.lines.find((line) => line.productId === FIB_1G.id);
+      const router = result.lines.find((line) => line.productId === MANAGED_ROUTER.id);
+
+      // 2% term + 18% negotiated = 20%, exactly at the fibre ceiling.
+      expect(fibre?.appliedDiscountRate).toBeCloseTo(0.2, 5);
+      expect(fibre?.discountCapped).toBe(false);
+
+      // The router is held at its own 10% ceiling, not dragged to it by others.
+      expect(router?.appliedDiscountRate).toBeCloseTo(0.1, 5);
+      expect(router?.discountCapped).toBe(true);
+    });
+
+    it('produces different totals for different requested discounts', () => {
+      // The symptom that exposed the per-bundle capping bug: two clearly
+      // different negotiated rates must not price identically.
+      const config = configuration({
+        contractMonths: 36,
+        selections: [
+          { productId: FIB_1G.id, quantity: 1 },
+          { productId: MANAGED_ROUTER.id, quantity: 1 },
+        ],
+      });
+
+      const at12 = calculatePrice({
+        configuration: config,
+        catalogue: CATALOGUE,
+        approvedManualRate: 0.12,
+      });
+      const at18 = calculatePrice({
+        configuration: config,
+        catalogue: CATALOGUE,
+        approvedManualRate: 0.18,
+      });
+
+      expect(at18.mrr).toBeLessThan(at12.mrr);
     });
 
     it('does not discount one-time setup charges', () => {

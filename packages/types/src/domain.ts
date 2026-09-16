@@ -147,6 +147,21 @@ export interface PriceLine {
   /** quantity-adjusted, before any discount */
   readonly monthlySubtotal: Cents;
   readonly setupSubtotal: Cents;
+
+  /**
+   * The discount rate actually applied to this line, 0..1.
+   *
+   * Discounts are capped PER LINE by the product's own ceiling, not per bundle.
+   * A 10%-capped router sitting in a quote discounted at 18% receives 10% while
+   * every other line receives 18% — capping the whole bundle at the least
+   * flexible product's ceiling would be commercially wrong and would make most
+   * mixed hardware/service quotes undiscountable.
+   */
+  readonly appliedDiscountRate: number;
+  /** Monthly discount on this line, in cents. */
+  readonly discountAmount: Cents;
+  /** True when the product's own ceiling bound this line below the requested rate. */
+  readonly discountCapped: boolean;
 }
 
 /** A discount that was actually applied, with the reason it qualified. */
@@ -195,9 +210,15 @@ export interface DiscountEvaluation {
   readonly requestedRate: number;
   /** The highest rate this role may self-approve, 0..1. */
   readonly roleMaxRate: number;
-  /** The highest rate the selected products permit, 0..1. */
-  readonly productMaxRate: number;
-  /** The binding ceiling: min(roleMax, productMax). */
+  /**
+   * The tightest per-product ceiling among the selected products, 0..1.
+   *
+   * Informational, NOT a global blocker: it tells the user that some lines will
+   * be capped below the requested rate. Line-level capping happens in the
+   * pricing engine — see `PriceLine.appliedDiscountRate`.
+   */
+  readonly tightestProductRate: number;
+  /** The binding ceiling on what this actor may grant unaided: the role cap. */
   readonly allowedRate: number;
   /** True when the request is within `allowedRate`. */
   readonly withinAuthority: boolean;
@@ -207,6 +228,8 @@ export interface DiscountEvaluation {
   readonly exceedsAllRoles: boolean;
   /** The lowest role that could approve this, when escalation is possible. */
   readonly escalatesTo: Role | null;
+  /** True when at least one line will be capped below the requested rate. */
+  readonly someLinesCapped: boolean;
   readonly reasons: readonly ApprovalReason[];
   /** Human-readable explanation rendered in the UI (§16). */
   readonly explanation: string;

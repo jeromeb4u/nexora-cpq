@@ -84,9 +84,12 @@ describe('discount engine', () => {
     });
   });
 
-  describe('product ceiling', () => {
-    it('is bounded by the least flexible product in the bundle', () => {
-      // Managed Router caps at 10%, so the whole bundle caps at 10%.
+  describe('product ceilings are informational, not a global blocker', () => {
+    it('does not block a bundle because one product caps lower', () => {
+      // The Managed Router caps at 10%. An earlier design treated that as a
+      // ceiling on the WHOLE quote, which made any bundle containing hardware
+      // effectively undiscountable and produced identical totals for different
+      // requested discounts. Ceilings now clamp their own line only.
       const result = evaluateDiscount(
         request({
           requestedBps: 1_500,
@@ -95,46 +98,46 @@ describe('discount engine', () => {
         }),
       );
 
-      expect(result.productMaxRate).toBeCloseTo(0.1, 5);
-      expect(result.allowedRate).toBeCloseTo(0.1, 5);
-      expect(result.exceedsAllRoles).toBe(true);
-      expect(result.escalatesTo).toBeNull();
-      expect(isDiscountBlocked(result)).toBe(true);
-    });
-
-    it('cannot be overridden by any role, including admin', () => {
-      const result = evaluateDiscount(
-        request({
-          requestedBps: 3_000,
-          role: Role.ADMIN,
-          selectedProducts: [MANAGED_ROUTER],
-        }),
-      );
-
-      expect(result.exceedsAllRoles).toBe(true);
-      expect(result.explanation).toContain('No role can approve this');
-    });
-
-    it('allows a request that sits exactly on the product ceiling', () => {
-      const result = evaluateDiscount(
-        request({
-          requestedBps: 2_500,
-          role: Role.PRICING_ADMIN,
-          selectedProducts: [STANDARD_SUPPORT],
-        }),
-      );
-
-      expect(result.withinAuthority).toBe(true);
       expect(result.exceedsAllRoles).toBe(false);
+      expect(isDiscountBlocked(result)).toBe(false);
+      expect(result.withinAuthority).toBe(true);
     });
 
-    it('permits no discount at all when nothing is selected', () => {
+    it('reports the tightest ceiling so the user knows lines will be capped', () => {
       const result = evaluateDiscount(
-        request({ requestedBps: 500, role: Role.ADMIN, selectedProducts: [] }),
+        request({
+          requestedBps: 1_500,
+          role: Role.PRICING_ADMIN,
+          selectedProducts: [FIB_1G, MANAGED_ROUTER],
+        }),
       );
 
-      expect(result.allowedRate).toBe(0);
+      expect(result.tightestProductRate).toBeCloseTo(0.1, 5);
+      expect(result.someLinesCapped).toBe(true);
+      expect(result.explanation).toContain('cap their own discount');
+    });
+
+    it('does not flag capping when every product allows the requested rate', () => {
+      const result = evaluateDiscount(
+        request({
+          requestedBps: 800,
+          role: Role.SALES_REP,
+          selectedProducts: [FIB_1G, MANAGED_FIREWALL],
+        }),
+      );
+
+      expect(result.someLinesCapped).toBe(false);
+      expect(result.explanation).not.toContain('cap their own discount');
+    });
+
+    it('still refuses a rate beyond what any role may approve', () => {
+      const result = evaluateDiscount(
+        request({ requestedBps: 4_000, role: Role.ADMIN, selectedProducts: [STANDARD_SUPPORT] }),
+      );
+
       expect(result.exceedsAllRoles).toBe(true);
+      expect(isDiscountBlocked(result)).toBe(true);
+      expect(result.explanation).toContain('maximum any role may approve');
     });
   });
 
@@ -180,13 +183,13 @@ describe('discount engine', () => {
       expect(result.withinAuthority).toBe(false);
     });
 
-    it('clamps a hostile request to the product ceiling when pricing', () => {
-      // A client POSTing "discount: 99%" must change nothing about the price.
+    it('clamps a hostile request to the absolute policy maximum when pricing', () => {
+      // A client POSTing "discount: 99%" must not be able to price at 99%.
       const rate = approvedDiscountRate(
         request({ requestedBps: 9_900, role: Role.SALES_REP, selectedProducts: [MANAGED_ROUTER] }),
       );
 
-      expect(rate).toBeCloseTo(0.1, 5);
+      expect(rate).toBeCloseTo(0.35, 5);
     });
 
     it('treats a negative request as zero', () => {

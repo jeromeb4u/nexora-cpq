@@ -21,12 +21,19 @@ import {
  *
  * Answers one question: given who is asking, what they are selling, and how
  * much they want to give away — is that allowed, does it need escalation, or is
- * it impossible?
+ * it beyond what anyone may grant?
  *
  * This is the security-critical half of pricing. The browser may *request* a
- * rate; only this function decides what rate is actually applied, and the
- * server calls it on every write. A client that posts 99% gets the same answer
- * as a client that posts it through the UI: clamped, and flagged for approval.
+ * rate; only this function decides what is permitted, and the server calls it
+ * on every write. A client that posts 99% gets the same answer as a client that
+ * posts it through the UI.
+ *
+ * **Role authority is what gates approval. Product ceilings are not.**
+ * A product's `maxDiscountRate` clamps that product's own line in the pricing
+ * engine; it never blocks the quote. Treating the tightest ceiling in a bundle
+ * as a global blocker was an earlier design here and it was wrong twice over:
+ * it made any quote containing hardware effectively undiscountable, and it made
+ * two different requested discounts produce identical totals.
  */
 
 export interface DiscountRequest {
@@ -38,14 +45,17 @@ export interface DiscountRequest {
   readonly tcv: Cents;
 }
 
+/** The highest discount any role may grant. Nothing above this is approvable. */
+const ABSOLUTE_MAX_BPS = Math.max(...Object.values(ROLE_MAX_DISCOUNT_BPS));
+
 /**
- * The tightest product ceiling in the configuration.
+ * The tightest per-product ceiling in the configuration.
  *
- * A bundle can never be discounted more than its least flexible component:
- * discounting a bundle 30% when one product caps at 15% would quietly breach
- * that product's margin floor.
+ * Informational only: it tells the user some lines will be capped below what
+ * they asked for, so the effective blended discount will come in lower than the
+ * headline rate. It does not stop the quote.
  */
-function productCeilingBps(products: readonly ProductSnapshot[]): BasisPoints {
+function tightestCeilingBps(products: readonly ProductSnapshot[]): BasisPoints {
   if (products.length === 0) return 0;
   return products.reduce(
     (lowest, product) => Math.min(lowest, rateToBps(product.maxDiscountRate)),
@@ -59,43 +69,6 @@ function lowestRoleThatCanApprove(requestedBps: BasisPoints): Role | null {
     if (ROLE_MAX_DISCOUNT_BPS[role] >= requestedBps) return role;
   }
   return null;
-}
-
-function buildExplanation(params: {
-  readonly requestedBps: BasisPoints;
-  readonly roleMaxBps: BasisPoints;
-  readonly productMaxBps: BasisPoints;
-  readonly role: Role;
-  readonly escalatesTo: Role | null;
-  readonly exceedsAllRoles: boolean;
-  readonly withinAuthority: boolean;
-  readonly tcvTriggered: boolean;
-}): string {
-  const requested = formatRate(bpsToRate(params.requestedBps));
-
-  if (params.requestedBps > params.productMaxBps) {
-    return `${requested} exceeds the ${formatRate(
-      bpsToRate(params.productMaxBps),
-    )} maximum permitted on one or more selected products. No role can approve this — reduce the discount or change the configuration.`;
-  }
-
-  if (params.withinAuthority && params.tcvTriggered) {
-    return `${requested} is within your authority, but the contract value exceeds the review threshold, so this quote still requires approval.`;
-  }
-
-  if (params.withinAuthority) {
-    return `${requested} is within your approval authority of ${formatRate(
-      bpsToRate(params.roleMaxBps),
-    )}.`;
-  }
-
-  if (params.exceedsAllRoles) {
-    return `${requested} exceeds the maximum discount any role may approve.`;
-  }
-
-  return `${requested} exceeds your approval authority of ${formatRate(
-    bpsToRate(params.roleMaxBps),
-  )}. This quote must be approved by ${roleLabel(params.escalatesTo)}.`;
 }
 
 function roleLabel(role: Role | null): string {
@@ -113,6 +86,44 @@ function roleLabel(role: Role | null): string {
   }
 }
 
+function buildExplanation(params: {
+  readonly requestedBps: BasisPoints;
+  readonly roleMaxBps: BasisPoints;
+  readonly tightestBps: BasisPoints;
+  readonly escalatesTo: Role | null;
+  readonly exceedsAllRoles: boolean;
+  readonly withinAuthority: boolean;
+  readonly tcvTriggered: boolean;
+  readonly someLinesCapped: boolean;
+}): string {
+  const requested = formatRate(bpsToRate(params.requestedBps));
+  const capNote = params.someLinesCapped
+    ? ` Some products cap their own discount at ${formatRate(
+        bpsToRate(params.tightestBps),
+      )}, so the effective discount across the quote will be lower than ${requested}.`
+    : '';
+
+  if (params.exceedsAllRoles) {
+    return `${requested} exceeds ${formatRate(
+      bpsToRate(ABSOLUTE_MAX_BPS),
+    )}, the maximum any role may approve. Reduce the discount to continue.${capNote}`;
+  }
+
+  if (params.withinAuthority && params.tcvTriggered) {
+    return `${requested} is within your authority, but the contract value exceeds the review threshold, so this quote still requires approval.${capNote}`;
+  }
+
+  if (params.withinAuthority) {
+    return `${requested} is within your approval authority of ${formatRate(
+      bpsToRate(params.roleMaxBps),
+    )}.${capNote}`;
+  }
+
+  return `${requested} exceeds your approval authority of ${formatRate(
+    bpsToRate(params.roleMaxBps),
+  )}. This quote must be approved by ${roleLabel(params.escalatesTo)}.${capNote}`;
+}
+
 /**
  * Evaluate a discount request against policy.
  *
@@ -123,22 +134,19 @@ function roleLabel(role: Role | null): string {
 export function evaluateDiscount(request: DiscountRequest): DiscountEvaluation {
   const requestedBps = Math.max(0, Math.round(request.requestedBps));
   const roleMaxBps = ROLE_MAX_DISCOUNT_BPS[request.role];
-  const productMaxBps = productCeilingBps(request.selectedProducts);
+  const tightestBps = tightestCeilingBps(request.selectedProducts);
 
-  // The binding ceiling: the user's authority, further limited by the products.
-  const allowedBps = Math.min(roleMaxBps, productMaxBps);
-
-  const exceedsProductCeiling = requestedBps > productMaxBps;
-  const withinAuthority = requestedBps <= allowedBps;
-
+  const withinAuthority = requestedBps <= roleMaxBps;
+  const exceedsAllRoles = requestedBps > ABSOLUTE_MAX_BPS;
   const tcvTriggered = request.tcv >= TCV_APPROVAL_THRESHOLD_CENTS;
 
-  // Escalation is only meaningful when the product ceiling still permits it.
-  const escalationTarget = exceedsProductCeiling ? null : lowestRoleThatCanApprove(requestedBps);
+  const escalationTarget = exceedsAllRoles ? null : lowestRoleThatCanApprove(requestedBps);
 
-  const exceedsAllRoles = exceedsProductCeiling || escalationTarget === null;
+  const requiresApproval =
+    (!withinAuthority && !exceedsAllRoles) || (withinAuthority && tcvTriggered);
 
-  const requiresApproval = (!withinAuthority && !exceedsAllRoles) || (withinAuthority && tcvTriggered);
+  const someLinesCapped =
+    request.selectedProducts.length > 0 && requestedBps > tightestBps;
 
   const reasons: ApprovalReason[] = [];
   if (!withinAuthority && !exceedsAllRoles) {
@@ -151,51 +159,46 @@ export function evaluateDiscount(request: DiscountRequest): DiscountEvaluation {
   return {
     requestedRate: bpsToRate(requestedBps),
     roleMaxRate: bpsToRate(roleMaxBps),
-    productMaxRate: bpsToRate(productMaxBps),
-    allowedRate: bpsToRate(allowedBps),
+    tightestProductRate: bpsToRate(tightestBps),
+    allowedRate: bpsToRate(roleMaxBps),
     withinAuthority,
     requiresApproval,
     exceedsAllRoles,
     escalatesTo: requiresApproval && !withinAuthority ? escalationTarget : null,
+    someLinesCapped,
     reasons,
     explanation: buildExplanation({
       requestedBps,
       roleMaxBps,
-      productMaxBps,
-      role: request.role,
+      tightestBps,
       escalatesTo: escalationTarget,
       exceedsAllRoles,
       withinAuthority,
       tcvTriggered,
+      someLinesCapped,
     }),
   };
 }
 
 /**
- * The rate the pricing engine should actually apply.
+ * The negotiated rate the pricing engine should apply.
  *
- * This is the clamp that makes client-submitted pricing harmless. A discount
- * beyond what any role can grant is reduced to the product ceiling; a discount
- * that merely needs escalation is applied in full so the approver sees the real
- * number they are being asked to sign off.
+ * This is the clamp that makes client-submitted pricing harmless. A rate beyond
+ * what any role could grant is reduced to that absolute maximum. A rate that
+ * merely needs escalation is passed through in full, so the approver reviews the
+ * real number they are being asked to sign off — the state machine, not the
+ * price, is what stops an unapproved quote from being sent.
+ *
+ * Per-product ceilings are NOT applied here; the pricing engine applies them
+ * per line, which is the only place that has line context.
  */
-export function approvedDiscountRate(
-  request: DiscountRequest,
-  options: { readonly hasApproval: boolean } = { hasApproval: false },
-): number {
+export function approvedDiscountRate(request: DiscountRequest): number {
   const evaluation = evaluateDiscount(request);
 
   if (evaluation.exceedsAllRoles) {
-    return evaluation.productMaxRate;
+    return bpsToRate(ABSOLUTE_MAX_BPS);
   }
 
-  if (evaluation.withinAuthority || options.hasApproval) {
-    return evaluation.requestedRate;
-  }
-
-  // Pending escalation: show the requested rate so the approver reviews the
-  // actual proposal. The quote cannot be sent until it is approved, and the
-  // state machine — not the price — is what enforces that.
   return evaluation.requestedRate;
 }
 
