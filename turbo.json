@@ -32,6 +32,10 @@
       "cache": false,
       "persistent": true
     },
+    "proxy": {
+      "cache": false,
+      "persistent": true
+    },
     "lint": {
       "dependsOn": ["^build"]
     },
