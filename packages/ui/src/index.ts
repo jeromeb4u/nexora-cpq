@@ -29,3 +29,5 @@ export * from './components/breadcrumbs';
 export * from './components/pagination';
 export * from './components/page-header';
 export * from './components/data-list';
+
+export * from './shell';

@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import '@nexora/config/tailwind/tokens.css';
+
+/* Tailwind v4 scans these sources for class usage. The shared UI package must
+   be listed explicitly: its classes live outside this app's own tree. */
+@source '../';
+@source '../../../../packages/ui/src';

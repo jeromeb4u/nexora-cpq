@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
     "./session": "./src/session.ts",
+    "./scope": "./src/scope.ts",
     "./client": "./src/client.ts",
     "./permissions": "./src/permissions.ts"
   },
