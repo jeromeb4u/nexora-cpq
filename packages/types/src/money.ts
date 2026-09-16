@@ -115,6 +115,33 @@ export function formatMoney(
   }).format(amount / 100);
 }
 
+/* ---------------------------------------------------------------------------
+ * Basis points
+ *
+ * Rates are persisted as integer basis points (1 bp = 0.01%), for the same
+ * reason money is persisted as integer cents: an 18% discount must be exactly
+ * 18%, and `0.1 + 0.08` is not. Basis points give exact storage and comparison
+ * with a resolution far finer than any commercial discount needs.
+ * ------------------------------------------------------------------------- */
+
+/** An exact rate in basis points: 1800 = 18%. */
+export type BasisPoints = number;
+
+export const BPS_PER_UNIT = 10_000;
+
+/** 1800 -> 0.18 */
+export function bpsToRate(bps: BasisPoints): number {
+  return bps / BPS_PER_UNIT;
+}
+
+/** 0.18 -> 1800 */
+export function rateToBps(rate: number): BasisPoints {
+  if (!Number.isFinite(rate)) {
+    throw new RangeError(`Rate must be finite, received ${rate}`);
+  }
+  return Math.round(rate * BPS_PER_UNIT);
+}
+
 /** Format a 0..1 rate as a percentage string, e.g. 0.185 -> "18.5%". */
 export function formatRate(rate: number, fractionDigits = 1): string {
   const percent = rate * 100;
