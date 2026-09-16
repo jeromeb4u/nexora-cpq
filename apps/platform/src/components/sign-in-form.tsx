@@ -67,7 +67,7 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
     });
   }
 
-  function useDemoAccount(email: string) {
+  function fillDemoAccount(email: string) {
     setValue('email', email, { shouldValidate: true });
     setValue('password', DEMO_PASSWORD, { shouldValidate: true });
     setFormError(null);
@@ -113,7 +113,7 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
             <li key={account.email}>
               <button
                 type="button"
-                onClick={() => useDemoAccount(account.email)}
+                onClick={() => fillDemoAccount(account.email)}
                 disabled={busy}
                 className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-3 py-2 text-left transition-colors hover:border-[var(--accent-border)] hover:bg-[var(--surface-selected)] disabled:opacity-50"
               >

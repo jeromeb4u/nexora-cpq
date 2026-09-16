@@ -44,9 +44,58 @@ export interface QuoteTableProps {
   readonly pageSize: number;
   readonly sortBy: string;
   readonly sortDir: 'asc' | 'desc';
+  /** Epoch ms captured once by the page, so every row measures from one instant. */
+  readonly now: number;
 }
 
 type SortableColumn = 'quoteNumber' | 'mrrCents' | 'status' | 'updatedAt';
+
+/**
+ * A sortable column header.
+ *
+ * Declared at module scope rather than inside `QuoteTable`. A component defined
+ * during render is a new component type on every render, so React unmounts and
+ * remounts its subtree instead of updating it — losing focus and any internal
+ * state. The `react-hooks/static-components` rule catches exactly this.
+ */
+function SortHeader({
+  column,
+  children,
+  align = 'left',
+  sortBy,
+  sortDir,
+  onToggle,
+}: {
+  readonly column: SortableColumn;
+  readonly children: React.ReactNode;
+  readonly align?: 'left' | 'right';
+  readonly sortBy: string;
+  readonly sortDir: 'asc' | 'desc';
+  readonly onToggle: (column: SortableColumn) => void;
+}) {
+  const active = sortBy === column;
+  const Icon = !active ? ChevronsUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
+
+  return (
+    <TableHead
+      aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+      className={align === 'right' ? 'text-right' : undefined}
+    >
+      <button
+        type="button"
+        onClick={() => onToggle(column)}
+        className={cn(
+          'inline-flex items-center gap-1 rounded-sm hover:text-[var(--text-primary)]',
+          align === 'right' && 'flex-row-reverse',
+          active && 'text-[var(--text-primary)]',
+        )}
+      >
+        {children}
+        <Icon className="size-3 shrink-0 opacity-60" aria-hidden />
+      </button>
+    </TableHead>
+  );
+}
 
 export function QuoteTable({
   rows,
@@ -56,6 +105,7 @@ export function QuoteTable({
   pageSize,
   sortBy,
   sortDir,
+  now,
 }: QuoteTableProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -80,39 +130,6 @@ export function QuoteTable({
     });
   }
 
-  function SortHeader({
-    column,
-    children,
-    align = 'left',
-  }: {
-    column: SortableColumn;
-    children: React.ReactNode;
-    align?: 'left' | 'right';
-  }) {
-    const active = sortBy === column;
-    const Icon = !active ? ChevronsUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
-
-    return (
-      <TableHead
-        aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
-        className={align === 'right' ? 'text-right' : undefined}
-      >
-        <button
-          type="button"
-          onClick={() => toggleSort(column)}
-          className={cn(
-            'inline-flex items-center gap-1 rounded-sm hover:text-[var(--text-primary)]',
-            align === 'right' && 'flex-row-reverse',
-            active && 'text-[var(--text-primary)]',
-          )}
-        >
-          {children}
-          <Icon className="size-3 shrink-0 opacity-60" aria-hidden />
-        </button>
-      </TableHead>
-    );
-  }
-
   const firstRow = (page - 1) * pageSize + 1;
   const lastRow = Math.min(page * pageSize, total);
 
@@ -122,16 +139,28 @@ export function QuoteTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <SortHeader column="quoteNumber">Quote</SortHeader>
+              <SortHeader column="quoteNumber" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+                Quote
+              </SortHeader>
               <TableHead>Customer</TableHead>
               <TableHead>Owner</TableHead>
-              <SortHeader column="mrrCents" align="right">
+              <SortHeader
+                column="mrrCents"
+                align="right"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              >
                 MRR
               </SortHeader>
               <TableHead className="text-right">Contract</TableHead>
               <TableHead className="text-right">Discount</TableHead>
-              <SortHeader column="status">Status</SortHeader>
-              <SortHeader column="updatedAt">Updated</SortHeader>
+              <SortHeader column="status" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+                Status
+              </SortHeader>
+              <SortHeader column="updatedAt" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+                Updated
+              </SortHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -169,7 +198,7 @@ export function QuoteTable({
                   <StatusBadge status={row.status} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-[var(--text-tertiary)]">
-                  <RelativeTime date={row.updatedAt} />
+                  <RelativeTime date={row.updatedAt} now={now} />
                 </TableCell>
               </TableRow>
             ))}

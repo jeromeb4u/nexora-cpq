@@ -15,3 +15,9 @@ export { prisma } from './client';
 // Prisma 7 re-exports model types (`Customer`, `Quote`, …), the generated
 // enums, and the `Prisma` namespace from the client entrypoint.
 export * from './generated/prisma/client';
+
+export {
+  toConfigurationRule,
+  toProductSnapshot,
+  type ProductRuleWithTargets,
+} from './projections';

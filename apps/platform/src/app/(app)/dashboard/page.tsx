@@ -20,6 +20,7 @@ import {
 import { bpsToRate, cents, formatMoney, formatRate } from '@nexora/types';
 
 import { requireSession } from '@/lib/session';
+import { requestInstant } from '@/lib/now';
 import { getDashboardMetrics, getRecentActivity, getRecentQuotes } from '@/lib/dashboard';
 import { MetricTile } from '@/components/metric-tile';
 import { RelativeTime } from '@/components/relative-time';
@@ -28,6 +29,8 @@ export const metadata: Metadata = { title: 'Dashboard' };
 
 export default async function DashboardPage() {
   const actor = await requireSession();
+
+  const now = requestInstant();
 
   const [metrics, recentQuotes, activity] = await Promise.all([
     getDashboardMetrics(actor),
@@ -142,7 +145,7 @@ export default async function DashboardPage() {
                         <StatusBadge status={quote.status} />
                       </TableCell>
                       <TableCell className="text-[var(--text-tertiary)]">
-                        <RelativeTime date={quote.updatedAt} />
+                        <RelativeTime date={quote.updatedAt} now={now} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -175,7 +178,7 @@ export default async function DashboardPage() {
                         {event.summary}
                       </p>
                       <p className="mt-0.5 text-2xs text-[var(--text-tertiary)]">
-                        {event.actor?.name ?? 'System'} · <RelativeTime date={event.createdAt} />
+                        {event.actor?.name ?? 'System'} · <RelativeTime date={event.createdAt} now={now} />
                       </p>
                     </div>
                   </li>

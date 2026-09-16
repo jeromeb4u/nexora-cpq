@@ -6,6 +6,7 @@ import { Permission } from '@nexora/auth/permissions';
 import { quoteListQuerySchema } from '@nexora/validation';
 
 import { requirePagePermission } from '@/lib/session';
+import { requestInstant } from '@/lib/now';
 import { listQuotes, listVisibleOwners } from '@/lib/quotes';
 import { QuoteFilters } from '@/components/quote-filters';
 import { QuoteTable } from '@/components/quote-table';
@@ -33,6 +34,8 @@ export default async function QuotesPage({
 
   const parsed = quoteListQuerySchema.safeParse(raw);
   const query = parsed.success ? parsed.data : quoteListQuerySchema.parse({});
+
+  const now = requestInstant();
 
   const [result, owners] = await Promise.all([
     listQuotes(actor, query),
@@ -79,6 +82,7 @@ export default async function QuotesPage({
           pageSize={result.pageSize}
           sortBy={query.sortBy}
           sortDir={query.sortDir}
+          now={now}
         />
       )}
     </div>

@@ -21,16 +21,11 @@ import {
 } from '@nexora/cpq-engine';
 
 import { prisma } from '../src/client';
+import { toConfigurationRule, toProductSnapshot } from '../src/projections';
 import type { Product, User } from '../src/generated/prisma/client';
 import { SEED_PRODUCTS } from './seed-data/catalogue';
 import { SEED_RULES } from './seed-data/rules';
-import {
-  createRandom,
-  daysAgo,
-  daysFromNow,
-  quoteNumber,
-  toProductSnapshot,
-} from './seed-helpers';
+import { createRandom, daysAgo, daysFromNow, quoteNumber } from './seed-helpers';
 
 /**
  * Database seed.
@@ -868,70 +863,17 @@ async function buildQuote(
   return { quoteId: quote.id, currentVersionId, mrrCents: currentMrr };
 }
 
-/** Load the persisted rules back into the engine's shape. */
+/**
+ * Load the persisted rules back into the engine's shape.
+ *
+ * The projection lives in `packages/db/src/projections.ts` so the seed and the
+ * running application map rules identically. A configuration validated one way
+ * at seed time and another at runtime would be a silent inconsistency, and the
+ * seed's whole purpose is to produce data the application agrees with.
+ */
 async function loadRules() {
   const rows = await prisma.productRule.findMany({ include: { targets: true } });
-
-  return rows.map((row) => ({
-    id: row.id,
-    type: row.type,
-    message: row.message,
-    severity: row.severity,
-    isActive: row.isActive,
-    priority: row.priority,
-    trigger: buildTrigger(row),
-    effect: buildEffect(row),
-  }));
-}
-
-type RuleRow = Awaited<ReturnType<typeof prisma.productRule.findMany>>[number] & {
-  targets: { productId: string }[];
-};
-
-function buildTrigger(row: RuleRow) {
-  switch (row.triggerKind) {
-    case 'PRODUCT_SELECTED':
-      return { kind: 'PRODUCT_SELECTED' as const, productId: row.triggerProductId ?? '' };
-    case 'CATEGORY_SELECTED':
-      return { kind: 'CATEGORY_SELECTED' as const, category: row.triggerCategory ?? 'CONNECTIVITY' };
-    case 'BANDWIDTH_AT_LEAST':
-      return { kind: 'BANDWIDTH_AT_LEAST' as const, mbps: row.triggerThreshold ?? 0 };
-    case 'CONTRACT_TERM_AT_LEAST':
-      return { kind: 'CONTRACT_TERM_AT_LEAST' as const, months: row.triggerThreshold ?? 0 };
-    case 'ALWAYS':
-      return { kind: 'ALWAYS' as const };
-  }
-}
-
-function buildEffect(row: RuleRow) {
-  switch (row.effectKind) {
-    case 'REQUIRES_PRODUCT':
-      return { kind: 'REQUIRES_PRODUCT' as const, productId: row.effectProductId ?? '' };
-    case 'REQUIRES_ONE_OF':
-      return {
-        kind: 'REQUIRES_ONE_OF' as const,
-        productIds: row.targets.map((target) => target.productId),
-      };
-    case 'INCOMPATIBLE_WITH_PRODUCT':
-      return {
-        kind: 'INCOMPATIBLE_WITH_PRODUCT' as const,
-        productId: row.effectProductId ?? '',
-      };
-    case 'RECOMMENDS_PRODUCT':
-      return { kind: 'RECOMMENDS_PRODUCT' as const, productId: row.effectProductId ?? '' };
-    case 'AT_MOST_ONE_OF':
-      return {
-        kind: 'AT_MOST_ONE_OF' as const,
-        productIds: row.targets.map((target) => target.productId),
-      };
-    case 'MIN_CONTRACT_MONTHS':
-      return { kind: 'MIN_CONTRACT_MONTHS' as const, months: row.effectThreshold ?? 12 };
-    case 'MIN_SERVICEABILITY':
-      return {
-        kind: 'MIN_SERVICEABILITY' as const,
-        level: row.effectServiceability ?? 'AVAILABLE',
-      };
-  }
+  return rows.map(toConfigurationRule);
 }
 
 // ---------------------------------------------------------------------------

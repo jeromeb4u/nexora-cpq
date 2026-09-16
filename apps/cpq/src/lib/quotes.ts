@@ -1,6 +1,7 @@
 import 'server-only';
 
-import { Prisma, prisma } from '@nexora/db';
+import { prisma } from '@nexora/db';
+import type { Prisma } from '@nexora/db';
 import type { Actor } from '@nexora/auth/next';
 import { quoteVisibilityFilter, teamIdsFor } from '@nexora/auth/scope';
 import { canEditQuote, canReadQuote } from '@nexora/auth/permissions';
