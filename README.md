@@ -147,9 +147,10 @@ every schema change. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 Feature-complete for the brief: authentication and RBAC · dashboard · customers
 and locations · quote list, detail, lifecycle actions and versioning · the
 ten-step configurator with live rule validation · pricing and discount engines ·
-approvals with authority limits · audit trail · product catalogue · PDF quote
-documents with streamed generation progress · signed customer document links ·
-transactional email · unit, integration and end-to-end tests · CI.
+approvals with authority limits · audit trail · notifications · product
+catalogue · PDF quote documents with streamed generation progress · signed
+customer document links · transactional email · unit, integration and
+end-to-end tests · CI.
 
 Known gaps are listed honestly in the
 [case study](docs/PORTFOLIO-CASE-STUDY.md#trade-offs-stated-plainly).

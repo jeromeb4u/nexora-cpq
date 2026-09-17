@@ -32,7 +32,10 @@ where the design is visible in the code rather than asserted in a README.
 - **Append-only versioning** with restore-as-new-version.
 - **Customer-grade PDF quotations**, generated on demand with live progress, and
   signed, expiring, version-bound links for customers.
-- **Transactional email** that works with no credentials at all.
+- **Transactional email** that works with no credentials at all, plus in-app
+  notifications that can actually be read and cleared.
+- **Customer and site management**, including serviceability, which is what the
+  configurator's rules are evaluated against.
 - **Two independently deployed micro frontends** that behave as one product.
 - A **test suite in three layers**, CI, and documentation of the decisions.
 
@@ -128,7 +131,8 @@ verification layers, not the features themselves.
 - **Integration tests** of the quote workflow and document generation against
   PostgreSQL.
 - **End-to-end tests** through the real micro-frontend composition: the quote
-  journey, approval, access control, invalid configurations and revisions.
+  journey, approval, access control, invalid configurations, revisions and
+  notifications. The journey test found two form defects on its first run.
 - **CI** runs lint, type-checking, all three test layers and a secret scan.
 - Harnesses refuse to run against the live demo database.
 
