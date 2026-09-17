@@ -199,6 +199,9 @@ importers:
       '@nexora/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nexora/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@nexora/observability':
         specifier: workspace:*
         version: link:../../packages/observability

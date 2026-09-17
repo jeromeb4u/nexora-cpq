@@ -49,3 +49,17 @@ export const quoteStatusTransitionSchema = z.object({
   note: nonEmptyString(1000).optional(),
 });
 export type QuoteStatusTransitionInput = z.infer<typeof quoteStatusTransitionSchema>;
+
+/**
+ * Copy an existing version of a quote into a new, current version. The source
+ * is never modified; history only grows.
+ */
+export const createRevisionSchema = z.object({
+  quoteId: cuidSchema,
+  sourceVersionId: cuidSchema,
+});
+export type CreateRevisionInput = z.infer<typeof createRevisionSchema>;
+
+/** Identifies a quote for actions that need nothing else (e.g. document generation). */
+export const quoteIdSchema = z.object({ quoteId: cuidSchema });
+export type QuoteIdInput = z.infer<typeof quoteIdSchema>;

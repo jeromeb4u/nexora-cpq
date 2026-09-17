@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "clean": "rimraf .next .turbo coverage *.tsbuildinfo"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
     "@nexora/auth": "workspace:*",
     "@nexora/cpq-engine": "workspace:*",
     "@nexora/db": "workspace:*",
+    "@nexora/email": "workspace:*",
     "@nexora/observability": "workspace:*",
     "@nexora/types": "workspace:*",
     "@nexora/ui": "workspace:*",

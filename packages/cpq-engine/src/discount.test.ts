@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { type ProductSnapshot, ApprovalReason, cents, Role } from '@nexora/types';
 
-import { approvedDiscountRate, evaluateDiscount, isDiscountBlocked } from './discount';
+import {
+  approvedDiscountRate,
+  canApproveDiscount,
+  evaluateDiscount,
+  isDiscountBlocked,
+} from './discount';
 import { TCV_APPROVAL_THRESHOLD_CENTS } from './policy';
 import {
   FIB_1G,
@@ -215,5 +220,14 @@ describe('discount engine', () => {
         approvedDiscountRate(request({ requestedBps: 1_800, role: Role.SALES_REP })),
       ).toBeCloseTo(0.18, 5);
     });
+  });
+});
+
+describe('approval authority', () => {
+  it('lets an approver sign off only up to their own ceiling', () => {
+    expect(canApproveDiscount(Role.SALES_MANAGER, 2000)).toBe(true);
+    expect(canApproveDiscount(Role.SALES_MANAGER, 2600)).toBe(false);
+    expect(canApproveDiscount(Role.PRICING_ADMIN, 2600)).toBe(true);
+    expect(canApproveDiscount(Role.PRICING_ADMIN, 3600)).toBe(false);
   });
 });

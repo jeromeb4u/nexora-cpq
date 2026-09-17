@@ -18,6 +18,7 @@ export {
 
 export {
   approvedDiscountRate,
+  canApproveDiscount,
   evaluateDiscount,
   isDiscountBlocked,
   type DiscountRequest,

@@ -18,7 +18,7 @@ export async function listPendingApprovals(actor: Actor) {
     where: {
       decision: 'PENDING',
       // Nobody approves their own quote; keep them out of the queue entirely.
-      quote: { ownerId: { not: actor.id } },
+      quote: { ownerId: { not: actor.id }, status: 'APPROVAL_REQUIRED' },
     },
     orderBy: { createdAt: 'asc' }, // oldest first: a queue, not a feed
     include: {
@@ -61,7 +61,7 @@ export async function listPendingApprovals(actor: Actor) {
 /** Recently decided approvals, so the page shows outcomes as well as work. */
 export async function listRecentDecisions(take = 10) {
   return prisma.quoteApproval.findMany({
-    where: { decision: { not: 'PENDING' } },
+    where: { decision: { in: ['APPROVED', 'REJECTED'] } },
     orderBy: { decidedAt: 'desc' },
     take,
     include: {

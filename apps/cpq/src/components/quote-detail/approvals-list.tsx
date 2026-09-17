@@ -11,10 +11,14 @@ const REASON_LABELS: Record<ApprovalReason, string> = {
   MANUAL_ESCALATION: 'Manual escalation',
 };
 
-const DECISION_META: Record<ApprovalDecision, { label: string; tone: 'warning' | 'success' | 'danger' }> = {
+const DECISION_META: Record<
+  ApprovalDecision,
+  { label: string; tone: 'warning' | 'success' | 'danger' | 'neutral' }
+> = {
   PENDING: { label: 'Pending', tone: 'warning' },
   APPROVED: { label: 'Approved', tone: 'success' },
   REJECTED: { label: 'Rejected', tone: 'danger' },
+  WITHDRAWN: { label: 'Withdrawn', tone: 'neutral' },
 };
 
 export interface ApprovalRow {

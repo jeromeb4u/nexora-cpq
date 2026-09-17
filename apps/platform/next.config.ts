@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
   },
 
   // Prisma's query engine is a native binary; it has to stay external.
-  serverExternalPackages: ['@prisma/client', '@prisma/adapter-neon'],
+  serverExternalPackages: ['@prisma/client', '@prisma/adapter-neon', '@prisma/adapter-pg', 'pg'],
 
   async headers() {
     return [

@@ -202,6 +202,17 @@ export function approvedDiscountRate(request: DiscountRequest): number {
   return evaluation.requestedRate;
 }
 
+/**
+ * May someone in `role` sign off a discount of `requestedBps`?
+ *
+ * Holding an approver role is necessary but not sufficient: a Sales Manager
+ * reviewing a 30% request is looking at something above their own authority,
+ * and approving it would launder the escalation. They may still reject it.
+ */
+export function canApproveDiscount(role: Role, requestedBps: BasisPoints): boolean {
+  return requestedBps <= ROLE_MAX_DISCOUNT_BPS[role];
+}
+
 /** Does this evaluation mean the quote cannot move forward at all? */
 export function isDiscountBlocked(evaluation: DiscountEvaluation): boolean {
   return evaluation.exceedsAllRoles;

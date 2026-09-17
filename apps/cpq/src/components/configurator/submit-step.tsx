@@ -162,7 +162,7 @@ export function SubmitStep({
  * superseded version would approve figures nobody is looking at.
  */
 async function currentVersionId(quoteId: string): Promise<string> {
-  const response = await fetch(`/api/quotes/${quoteId}/current-version`, {
+  const response = await fetch(`/quotes/${quoteId}/current-version`, {
     cache: 'no-store',
   });
 

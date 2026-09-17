@@ -131,6 +131,8 @@ enum ApprovalDecision {
   PENDING
   APPROVED
   REJECTED
+  /// The requester pulled the quote back before a decision was made.
+  WITHDRAWN
 }
 
 enum ApprovalReason {

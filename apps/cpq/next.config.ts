@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     '@nexora/db',
     '@nexora/cpq-engine',
     '@nexora/observability',
+    '@nexora/email',
   ],
 
   typescript: {
@@ -38,7 +39,7 @@ const nextConfig: NextConfig = {
     },
   },
 
-  serverExternalPackages: ['@prisma/client', '@prisma/adapter-neon', '@react-pdf/renderer'],
+  serverExternalPackages: ['@prisma/client', '@prisma/adapter-neon', '@prisma/adapter-pg', 'pg', '@react-pdf/renderer'],
 
   async headers() {
     return [

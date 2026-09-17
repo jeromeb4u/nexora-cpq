@@ -18,11 +18,8 @@ export {
   type QuoteSentInput,
 } from './templates';
 
-export interface EmailEnvironment {
-  readonly EMAIL_PROVIDER?: string;
-  readonly RESEND_API_KEY?: string;
-  readonly VERCEL?: string;
-}
+/** Reads EMAIL_PROVIDER, RESEND_API_KEY and VERCEL. Index-signature typed so `process.env` fits it in every app. */
+export type EmailEnvironment = { readonly [key: string]: string | undefined };
 
 /**
  * Choose a provider from the environment.

@@ -157,6 +157,7 @@ export const ApprovalDecision = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
+  WITHDRAWN: 'WITHDRAWN',
 } as const;
 export type ApprovalDecision = (typeof ApprovalDecision)[keyof typeof ApprovalDecision];
 export const APPROVAL_DECISIONS = Object.values(ApprovalDecision);
