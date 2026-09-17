@@ -15,7 +15,9 @@ export async function signIn(page: Page, email: string): Promise<void> {
   await page.getByLabel('Work email').fill(email);
   await page.getByLabel('Password').fill(DEMO_PASSWORD);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  // Generous on purpose: the first sign-in of a run pays for a cold server and
+  // the dashboard's own queries, which can exceed the default expect timeout.
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
 }
 
 /** Open a quote by its number from the quote list (which only lists quotes the user may see). */
