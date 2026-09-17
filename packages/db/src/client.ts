@@ -1,6 +1,8 @@
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from './generated/prisma/client';
+import { driverFor } from './driver';
 
 /**
  * The Prisma client singleton.
@@ -14,12 +16,16 @@ import { PrismaClient } from './generated/prisma/client';
  * `server-only` throws under a normal Node resolver, so guarding this file
  * would have made the database unseedable.
  *
- * Connection strategy (Prisma 7 + Neon):
- *   - The runtime uses the POOLED url through the Neon serverless driver
- *     adapter. On Vercel, each request may land in a fresh isolate, so holding
- *     raw TCP connections would exhaust Postgres' connection limit quickly.
- *   - Prisma Migrate uses the DIRECT url instead, configured in
- *     prisma.config.ts, because migrations need advisory locks a pooler drops.
+ * Driver selection:
+ *   - A Neon host uses the Neon serverless driver. On Vercel each request may
+ *     land in a fresh isolate, and Neon's driver connects over WebSockets/HTTP
+ *     through Neon's pooler instead of holding raw TCP connections that would
+ *     exhaust Postgres' connection limit.
+ *   - Any other host uses node-postgres. Neon's driver cannot speak to an
+ *     ordinary Postgres server — it needs Neon's WebSocket proxy — so without
+ *     this branch the application would silently require Neon, and CI's
+ *     Postgres service container (or a developer's local Postgres) would not
+ *     work at all.
  *
  * In development the instance is cached on `globalThis` so Next.js hot reload
  * does not open a new pool on every edit.
@@ -34,13 +40,19 @@ function createPrismaClient(): PrismaClient {
     );
   }
 
-  const adapter = new PrismaNeon({ connectionString });
+  const adapter =
+    driverFor(connectionString) === 'neon'
+      ? new PrismaNeon({ connectionString })
+      : new PrismaPg({ connectionString });
 
   return new PrismaClient({
     adapter,
     log:
       process.env.NODE_ENV === 'development'
-        ? [{ emit: 'stdout', level: 'warn' }, { emit: 'stdout', level: 'error' }]
+        ? [
+            { emit: 'stdout', level: 'warn' },
+            { emit: 'stdout', level: 'error' },
+          ]
         : [{ emit: 'stdout', level: 'error' }],
   });
 }
