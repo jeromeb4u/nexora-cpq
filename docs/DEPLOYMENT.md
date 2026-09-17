@@ -55,7 +55,7 @@ Set on **both** projects unless noted.
 | `DATABASE_URL` | **Pooled** Postgres URL. Used at runtime. Serverless functions may each land in a fresh isolate, so unpooled connections exhaust Postgres quickly. |
 | `DIRECT_DATABASE_URL` | **Direct / unpooled** URL. Used only by Prisma Migrate, which needs advisory locks a pooler drops. |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32`. Must be **identical on both projects** — CPQ verifies the session cookie Platform issued, and a differing secret makes every session look forged. |
-| `BETTER_AUTH_URL` | The public origin users browse, e.g. `https://nexora-cpq.vercel.app`. Not the individual app's own domain. |
+| `BETTER_AUTH_URL` | The public origin users browse — the **default app's** production domain, e.g. `https://nexora-platform-gamma.vercel.app`. With a microfrontends group, every route (including CPQ's) is served from this one origin. |
 | `AUTH_TRUSTED_ORIGINS` | Comma-separated. **Must include the public origin.** Better Auth validates the `Origin` header and returns a bare 403 otherwise — and in a micro frontend the browser is never served from an app's own origin. This is the single most common way to break a working deployment. |
 | `NEXT_PUBLIC_PLATFORM_URL` | Public origin. |
 | `NEXT_PUBLIC_CPQ_URL` | Public origin. |
@@ -66,6 +66,24 @@ Set on **both** projects unless noted.
 
 `AUTH_TRUSTED_ORIGINS` also accepts preview deployments; `VERCEL_URL` is trusted
 automatically so branch previews authenticate without extra configuration.
+
+## Production domain is not the project name
+
+A `.vercel.app` subdomain is a global namespace. If `nexora-platform.vercel.app`
+is already owned by anyone, Vercel assigns a suffixed alias instead — this
+deployment received `nexora-platform-gamma.vercel.app`. Nothing warns you.
+
+Three things depend on that exact origin and silently break if it is guessed:
+
+- `development.fallback` in `microfrontends.json`
+- `BETTER_AUTH_URL` and `AUTH_TRUSTED_ORIGINS` — a wrong origin makes every
+  sign-in return a bare 403
+- `NEXT_PUBLIC_PLATFORM_URL` / `NEXT_PUBLIC_CPQ_URL`
+
+So the order that actually works is: deploy once, read the real production alias
+from the project's Domains page (or the Vercel API), **then** set those values
+and redeploy. Setting them before the first deploy means setting them from a
+guess. A custom domain avoids the problem entirely.
 
 ## First deployment
 

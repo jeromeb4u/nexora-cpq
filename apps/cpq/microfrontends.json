@@ -5,7 +5,7 @@
       "packageName": "@nexora/platform",
       "development": {
         "local": 3000,
-        "fallback": "nexora-platform.vercel.app"
+        "fallback": "nexora-platform-gamma.vercel.app"
       }
     },
     "nexora-cpq": {
