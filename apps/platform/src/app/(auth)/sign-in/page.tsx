@@ -53,7 +53,7 @@ export default async function SignInPage({
 
       <SignInForm nextPath={nextPath} />
 
-      <p className="mt-10 max-w-sm text-center text-2xs leading-relaxed text-[var(--text-tertiary)]">
+      <p className="text-2xs mt-10 max-w-sm text-center leading-relaxed text-[var(--text-tertiary)]">
         Nexora Telecom is a fictional company created for this portfolio project. All customers,
         pricing and quotes shown are invented demonstration data.
       </p>

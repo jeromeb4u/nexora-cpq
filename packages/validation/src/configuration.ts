@@ -37,7 +37,8 @@ export const saveConfigurationSchema = z
       return typeof data.discountReason === 'string' && data.discountReason.length >= 10;
     },
     {
-      error: 'A requested discount needs a reason of at least 10 characters explaining why it is justified.',
+      error:
+        'A requested discount needs a reason of at least 10 characters explaining why it is justified.',
       path: ['discountReason'],
     },
   );

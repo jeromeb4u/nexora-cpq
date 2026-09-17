@@ -75,7 +75,10 @@ export function CustomerFilters({ owners }: CustomerFiltersProps) {
   }
 
   const hasFilters =
-    Boolean(search) || selectedStatuses.length > 0 || Boolean(selectedIndustry) || Boolean(selectedOwner);
+    Boolean(search) ||
+    selectedStatuses.length > 0 ||
+    Boolean(selectedIndustry) ||
+    Boolean(selectedOwner);
 
   return (
     <div
@@ -166,7 +169,7 @@ export function CustomerFilters({ owners }: CustomerFiltersProps) {
               onClick={() => toggleStatus(status)}
               aria-pressed={active}
               className={cn(
-                'rounded-full border px-2.5 py-1 text-2xs font-medium transition-colors',
+                'text-2xs rounded-full border px-2.5 py-1 font-medium transition-colors',
                 active
                   ? 'border-[var(--accent-border)] bg-[var(--surface-selected)] text-[var(--text-link)]'
                   : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]',

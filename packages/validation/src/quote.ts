@@ -13,9 +13,12 @@ export type CreateQuoteInput = z.infer<typeof createQuoteSchema>;
  * Editable metadata on an existing quote. The customer a quote belongs to is
  * immutable once created, so it is intentionally not part of this schema.
  */
-export const updateQuoteMetadataSchema = createQuoteSchema.omit({ customerId: true }).partial().extend({
-  id: cuidSchema,
-});
+export const updateQuoteMetadataSchema = createQuoteSchema
+  .omit({ customerId: true })
+  .partial()
+  .extend({
+    id: cuidSchema,
+  });
 export type UpdateQuoteMetadataInput = z.infer<typeof updateQuoteMetadataSchema>;
 
 export const quoteSortBySchema = z.enum(['quoteNumber', 'updatedAt', 'mrrCents', 'status'], {
@@ -31,11 +34,17 @@ export const quoteListQuerySchema = z.object({
   status: csvArray(quoteStatusSchema),
   ownerId: cuidSchema.optional(),
   customerId: cuidSchema.optional(),
-  updatedAfter: z
-    .iso.datetime({ offset: true, error: 'Enter a valid ISO 8601 date and time, for example 2026-01-01T00:00:00Z.' })
+  updatedAfter: z.iso
+    .datetime({
+      offset: true,
+      error: 'Enter a valid ISO 8601 date and time, for example 2026-01-01T00:00:00Z.',
+    })
     .optional(),
-  updatedBefore: z
-    .iso.datetime({ offset: true, error: 'Enter a valid ISO 8601 date and time, for example 2026-01-01T00:00:00Z.' })
+  updatedBefore: z.iso
+    .datetime({
+      offset: true,
+      error: 'Enter a valid ISO 8601 date and time, for example 2026-01-01T00:00:00Z.',
+    })
     .optional(),
   sortBy: quoteSortBySchema.default('updatedAt'),
   sortDir: sortDirSchema.default('desc'),

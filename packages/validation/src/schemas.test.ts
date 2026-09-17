@@ -107,12 +107,18 @@ describe('configurationSelectionSchema', () => {
   });
 
   it('rejects quantity 0', () => {
-    const result = configurationSelectionSchema.safeParse({ ...validConfigurationSelection, quantity: 0 });
+    const result = configurationSelectionSchema.safeParse({
+      ...validConfigurationSelection,
+      quantity: 0,
+    });
     expect(result.success).toBe(false);
   });
 
   it('rejects quantity 1000', () => {
-    const result = configurationSelectionSchema.safeParse({ ...validConfigurationSelection, quantity: 1000 });
+    const result = configurationSelectionSchema.safeParse({
+      ...validConfigurationSelection,
+      quantity: 1000,
+    });
     expect(result.success).toBe(false);
   });
 });

@@ -26,31 +26,24 @@ export function MetricTile({ label, value, hint, tone = 'neutral', href }: Metri
           {label}
         </p>
         {href ? (
-          <ArrowUpRight
-            className="size-3.5 shrink-0 text-[var(--text-tertiary)]"
-            aria-hidden
-          />
+          <ArrowUpRight className="size-3.5 shrink-0 text-[var(--text-tertiary)]" aria-hidden />
         ) : null}
       </div>
       <p
         className={cn(
           'tabular mt-2 text-2xl font-semibold tracking-tight',
-          tone === 'attention'
-            ? 'text-[var(--color-warning-600)]'
-            : 'text-[var(--text-primary)]',
+          tone === 'attention' ? 'text-[var(--color-warning-600)]' : 'text-[var(--text-primary)]',
         )}
       >
         {value}
       </p>
-      {hint ? <p className="mt-1 text-2xs text-[var(--text-tertiary)]">{hint}</p> : null}
+      {hint ? <p className="text-2xs mt-1 text-[var(--text-tertiary)]">{hint}</p> : null}
     </>
   );
 
   const className = cn(
     'block rounded-lg border bg-[var(--surface-raised)] p-4 transition-colors',
-    tone === 'attention'
-      ? 'border-[var(--color-warning-200)]'
-      : 'border-[var(--border-subtle)]',
+    tone === 'attention' ? 'border-[var(--color-warning-200)]' : 'border-[var(--border-subtle)]',
     href && 'hover:border-[var(--accent-border)] hover:bg-[var(--surface-selected)]',
   );
 

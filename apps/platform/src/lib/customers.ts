@@ -4,6 +4,15 @@ import { prisma } from '@nexora/db';
 import type { Prisma } from '@nexora/db';
 import { notFound } from '@nexora/observability';
 import type { CustomerListQueryInput } from '@nexora/validation';
+import type { Role } from '@nexora/types';
+
+/**
+ * Roles that may be an account owner. Shared with
+ * `lib/services/customer-service.ts`, which enforces the same list
+ * server-side when a customer is created or reassigned — this is the single
+ * source of truth for both.
+ */
+export const ASSIGNABLE_OWNER_ROLES: readonly Role[] = ['SALES_REP', 'SALES_MANAGER', 'ADMIN'];
 
 /**
  * Customer queries.
@@ -148,6 +157,18 @@ export async function getCustomerDetail(customerId: string) {
   if (!customer) throw notFound('Customer');
 
   return customer;
+}
+
+/**
+ * Active users eligible to be a customer's account owner, for the "New
+ * customer" / "Edit customer" form's owner picker.
+ */
+export async function listAssignableOwners() {
+  return prisma.user.findMany({
+    where: { isActive: true, role: { in: [...ASSIGNABLE_OWNER_ROLES] } },
+    select: { id: true, name: true, role: true },
+    orderBy: { name: 'asc' },
+  });
 }
 
 /**

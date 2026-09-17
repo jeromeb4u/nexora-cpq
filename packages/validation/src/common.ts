@@ -152,14 +152,16 @@ export function csvArray<T extends ZodType>(elementSchema: T) {
  * string `"true"`/`"false"` (as it arrives from a query string) and a real
  * boolean are accepted.
  */
-export const booleanQueryParam = z.preprocess((value) => {
-  if (value === undefined || value === null || value === '') return undefined;
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'string') {
-    const normalized = value.trim().toLowerCase();
-    if (normalized === 'true') return true;
-    if (normalized === 'false') return false;
-  }
-  return value;
-}, z.boolean({ error: "Value must be 'true' or 'false'." }).optional());
-
+export const booleanQueryParam = z.preprocess(
+  (value) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+    }
+    return value;
+  },
+  z.boolean({ error: "Value must be 'true' or 'false'." }).optional(),
+);

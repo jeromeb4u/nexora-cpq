@@ -134,7 +134,12 @@ export function CustomerTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <SortHeader column="companyName" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+              <SortHeader
+                column="companyName"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              >
                 Company
               </SortHeader>
               <TableHead>Industry</TableHead>
@@ -144,7 +149,12 @@ export function CustomerTable({
               <TableHead className="text-right">Locations</TableHead>
               <TableHead className="text-right">Quotes</TableHead>
               <TableHead>Account owner</TableHead>
-              <SortHeader column="updatedAt" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+              <SortHeader
+                column="updatedAt"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              >
                 Updated
               </SortHeader>
             </TableRow>

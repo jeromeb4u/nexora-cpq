@@ -16,8 +16,4 @@ export { prisma } from './client';
 // enums, and the `Prisma` namespace from the client entrypoint.
 export * from './generated/prisma/client';
 
-export {
-  toConfigurationRule,
-  toProductSnapshot,
-  type ProductRuleWithTargets,
-} from './projections';
+export { toConfigurationRule, toProductSnapshot, type ProductRuleWithTargets } from './projections';

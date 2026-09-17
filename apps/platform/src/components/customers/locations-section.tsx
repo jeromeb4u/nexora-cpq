@@ -1,4 +1,5 @@
-import { Card, CardHeader, CardTitle, EmptyState, StatusBadge } from '@nexora/ui';
+import Link from 'next/link';
+import { Button, Card, CardHeader, CardTitle, EmptyState, StatusBadge } from '@nexora/ui';
 import type { Serviceability } from '@nexora/types';
 
 import { formatBandwidth } from './labels';
@@ -22,14 +23,26 @@ export interface LocationRow {
 
 export interface LocationsSectionProps {
   readonly locations: readonly LocationRow[];
+  readonly customerId: string;
+  /** Render "Add location" / per-location "Edit" only for viewers who hold `LOCATION_MANAGE`. */
+  readonly canManageLocations: boolean;
 }
 
 /** Sites on file for this customer, primary first — see `getCustomerDetail`. */
-export function LocationsSection({ locations }: LocationsSectionProps) {
+export function LocationsSection({
+  locations,
+  customerId,
+  canManageLocations,
+}: LocationsSectionProps) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex-row items-center justify-between">
         <CardTitle>Locations</CardTitle>
+        {canManageLocations ? (
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/customers/${customerId}/locations/new`}>Add location</Link>
+          </Button>
+        ) : null}
       </CardHeader>
       {locations.length === 0 ? (
         <EmptyState
@@ -44,12 +57,21 @@ export function LocationsSection({ locations }: LocationsSectionProps) {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-[var(--text-primary)]">{location.name}</p>
                   {location.isPrimary ? (
-                    <span className="rounded-full border border-[var(--accent-border)] bg-[var(--surface-selected)] px-2 py-0.5 text-2xs font-medium text-[var(--text-link)]">
+                    <span className="text-2xs rounded-full border border-[var(--accent-border)] bg-[var(--surface-selected)] px-2 py-0.5 font-medium text-[var(--text-link)]">
                       Primary
                     </span>
                   ) : null}
                 </div>
-                <StatusBadge status={location.serviceability} />
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={location.serviceability} />
+                  {canManageLocations ? (
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href={`/customers/${customerId}/locations/${location.id}/edit`}>
+                        Edit
+                      </Link>
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
               <p className="text-xs text-[var(--text-secondary)]">

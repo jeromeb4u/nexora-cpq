@@ -127,10 +127,7 @@ export async function getRecentActivity(actor: Actor, take = 8) {
 
   return prisma.auditEvent.findMany({
     where: {
-      OR: [
-        { entity: 'QUOTE', entityId: { in: visibleIds } },
-        { actorId: actor.id },
-      ],
+      OR: [{ entity: 'QUOTE', entityId: { in: visibleIds } }, { actorId: actor.id }],
     },
     orderBy: { createdAt: 'desc' },
     take,

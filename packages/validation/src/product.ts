@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import { basisPointsSchema, booleanQueryParam, csvArray, cuidSchema, moneyCentsSchema, nonEmptyString, paginationSchema } from './common';
+import {
+  basisPointsSchema,
+  booleanQueryParam,
+  csvArray,
+  cuidSchema,
+  moneyCentsSchema,
+  nonEmptyString,
+  paginationSchema,
+} from './common';
 import { contractTermSchema, productCategorySchema, pricingModelSchema } from './enums';
 
 export const skuSchema = z
@@ -7,7 +15,8 @@ export const skuSchema = z
   .trim()
   .toUpperCase()
   .regex(/^[A-Z0-9]+(-[A-Z0-9]+)*$/, {
-    error: 'Enter a SKU using only uppercase letters, numbers, and hyphens, for example SDWAN-100M.',
+    error:
+      'Enter a SKU using only uppercase letters, numbers, and hyphens, for example SDWAN-100M.',
   })
   .max(50, { error: 'SKU must be 50 characters or fewer.' });
 

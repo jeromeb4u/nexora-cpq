@@ -177,8 +177,9 @@ export default async function DashboardPage() {
                       <p className="text-sm leading-snug text-[var(--text-primary)]">
                         {event.summary}
                       </p>
-                      <p className="mt-0.5 text-2xs text-[var(--text-tertiary)]">
-                        {event.actor?.name ?? 'System'} · <RelativeTime date={event.createdAt} now={now} />
+                      <p className="text-2xs mt-0.5 text-[var(--text-tertiary)]">
+                        {event.actor?.name ?? 'System'} ·{' '}
+                        <RelativeTime date={event.createdAt} now={now} />
                       </p>
                     </div>
                   </li>

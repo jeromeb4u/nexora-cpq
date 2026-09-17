@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button, EmptyState, PageHeader } from '@nexora/ui';
-import { Permission } from '@nexora/auth/permissions';
+import { Permission, can } from '@nexora/auth/permissions';
 import { customerListQuerySchema } from '@nexora/validation';
 
 import { requirePagePermission } from '@/lib/session';
@@ -26,7 +26,8 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePagePermission(Permission.CUSTOMER_READ);
+  const actor = await requirePagePermission(Permission.CUSTOMER_READ);
+  const canCreateCustomer = can(actor.role, Permission.CUSTOMER_CREATE);
   const raw = await searchParams;
 
   const parsed = customerListQuerySchema.safeParse(raw);
@@ -42,6 +43,13 @@ export default async function CustomersPage({
         title="Customers"
         description={
           result.total === 1 ? '1 customer' : `${result.total.toLocaleString('en-GB')} customers`
+        }
+        actions={
+          canCreateCustomer ? (
+            <Button asChild>
+              <Link href="/customers/new">New customer</Link>
+            </Button>
+          ) : undefined
         }
       />
 

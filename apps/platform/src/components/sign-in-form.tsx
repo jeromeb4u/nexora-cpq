@@ -103,9 +103,9 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
 
       <div className="mt-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-sunken)] p-4">
         <p className="text-xs font-medium text-[var(--text-primary)]">Demo accounts</p>
-        <p className="mt-1 text-2xs leading-relaxed text-[var(--text-tertiary)]">
-          This is a fictional demonstration system. Choose a role to sign in — each sees a
-          different slice of the product.
+        <p className="text-2xs mt-1 leading-relaxed text-[var(--text-tertiary)]">
+          This is a fictional demonstration system. Choose a role to sign in — each sees a different
+          slice of the product.
         </p>
 
         <ul className="mt-3 space-y-1.5">
@@ -120,13 +120,13 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
                 <span className="block text-xs font-medium text-[var(--text-primary)]">
                   {account.label}
                 </span>
-                <span className="block text-2xs text-[var(--text-tertiary)]">{account.detail}</span>
+                <span className="text-2xs block text-[var(--text-tertiary)]">{account.detail}</span>
               </button>
             </li>
           ))}
         </ul>
 
-        <p className="mt-3 font-mono text-2xs text-[var(--text-tertiary)]">
+        <p className="text-2xs mt-3 font-mono text-[var(--text-tertiary)]">
           Password for all accounts: {DEMO_PASSWORD}
         </p>
       </div>

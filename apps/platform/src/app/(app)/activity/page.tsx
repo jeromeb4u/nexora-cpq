@@ -29,7 +29,10 @@ export default async function ActivityPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Activity" description="Your notifications, and the recent trail you can see." />
+      <PageHeader
+        title="Activity"
+        description="Your notifications, and the recent trail you can see."
+      />
 
       <Card>
         <CardHeader>
@@ -64,8 +67,10 @@ export default async function ActivityPage() {
                     >
                       {notification.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">{notification.body}</p>
-                    <p className="mt-1 text-2xs text-[var(--text-tertiary)]">
+                    <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
+                      {notification.body}
+                    </p>
+                    <p className="text-2xs mt-1 text-[var(--text-tertiary)]">
                       <RelativeTime date={notification.createdAt} now={now} />
                     </p>
                   </div>

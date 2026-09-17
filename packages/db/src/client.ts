@@ -2,7 +2,7 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from './generated/prisma/client';
-import { driverFor } from './driver';
+import { driverFor, pgPoolOptions } from './driver';
 
 /**
  * The Prisma client singleton.
@@ -43,7 +43,7 @@ function createPrismaClient(): PrismaClient {
   const adapter =
     driverFor(connectionString) === 'neon'
       ? new PrismaNeon({ connectionString })
-      : new PrismaPg({ connectionString });
+      : new PrismaPg({ connectionString, ...pgPoolOptions(process.env) });
 
   return new PrismaClient({
     adapter,

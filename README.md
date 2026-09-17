@@ -56,7 +56,8 @@ packages/
   db/                Prisma schema, client, seed, projections
   auth/              Better Auth, RBAC matrix, query scoping
   ui/                design system + the shared app shell
-  observability/     structured logging, error boundary
+  observability/     structured logging, safe errors
+  email/             providers (console · filesystem · Resend) and templates
   config/            TS / ESLint presets, design tokens
 ```
 
@@ -121,10 +122,12 @@ escalation, the state machine and the audit trail in one go.
 | `pnpm build` | production build of everything |
 | `pnpm typecheck` | TypeScript, strict, across all packages |
 | `pnpm lint` | ESLint |
-| `pnpm test` | unit + integration tests |
+| `pnpm test` | unit tests |
+| `pnpm test:integration` | service tests against PostgreSQL (`TEST_DATABASE_URL`) |
+| `pnpm test:e2e` | Playwright through the MFE proxy (`E2E_DATABASE_URL`) |
 | `pnpm db:setup` | generate → migrate → seed |
 | `pnpm db:seed` | reseed (deterministic — same data every time) |
-| `pnpm db:seed:verify` | assert the seeded scenario is coherent |
+| `pnpm --filter @nexora/db seed:verify` | assert the seeded scenario is coherent |
 | `pnpm db:studio` | Prisma Studio |
 
 ---
@@ -141,13 +144,31 @@ every schema change. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Status
 
-Built and working: authentication and RBAC · dashboard · customers · quote list,
-detail and versioning · the ten-step configurator with live rule validation ·
-pricing and discount engines · approvals inbox · audit trail · product
-catalogue.
+Feature-complete for the brief: authentication and RBAC · dashboard · customers
+and locations · quote list, detail, lifecycle actions and versioning · the
+ten-step configurator with live rule validation · pricing and discount engines ·
+approvals with authority limits · audit trail · product catalogue · PDF quote
+documents with streamed generation progress · signed customer document links ·
+transactional email · unit, integration and end-to-end tests · CI.
 
-Still to come: PDF quote documents · transactional email · SSE progress ·
-end-to-end tests · CI workflow · the full architecture documentation set.
+Known gaps are listed honestly in the
+[case study](docs/PORTFOLIO-CASE-STUDY.md#trade-offs-stated-plainly).
+
+---
+
+## Documentation
+
+| | |
+|---|---|
+| [Architecture](docs/ARCHITECTURE.md) | system context, packages, request lifecycle, quote lifecycle |
+| [Micro frontends](docs/MFE.md) | zone ownership, routing, shared session and shell |
+| [Database](docs/DATABASE.md) | model, money, indexes, migrations, seed |
+| [CPQ rules](docs/CPQ-RULES.md) | rules, pricing, discount authority, state machine |
+| [Security](docs/SECURITY.md) | threat model, authN/authZ, audit |
+| [Testing](docs/TESTING.md) | the three test layers and CI |
+| [Deployment](docs/DEPLOYMENT.md) | Vercel projects, environment, free tier |
+| [Decisions](docs/DECISIONS.md) | ADR index and smaller decisions |
+| [Case study](docs/PORTFOLIO-CASE-STUDY.md) | the problem, the design, what went wrong |
 
 ---
 

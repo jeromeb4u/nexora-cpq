@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { csvArray, cuidSchema, emailSchema, nonEmptyString, paginationSchema, phoneSchema, sortDirSchema, vatNumberSchema } from './common';
+import {
+  csvArray,
+  cuidSchema,
+  emailSchema,
+  nonEmptyString,
+  paginationSchema,
+  phoneSchema,
+  sortDirSchema,
+  vatNumberSchema,
+} from './common';
 import { customerStatusSchema, industrySchema } from './enums';
 
 /**
@@ -23,8 +32,16 @@ export const createCustomerSchema = z.object({
 });
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 
+/**
+ * Every field is optional on update: an omitted key means "leave unchanged".
+ * The genuinely optional columns also accept `null`, which means "clear it" —
+ * without that, emptying a customer's website in the edit form could never
+ * reach the database.
+ */
 export const updateCustomerSchema = createCustomerSchema.partial().extend({
   id: cuidSchema,
+  website: createCustomerSchema.shape.website.unwrap().nullable().optional(),
+  notes: createCustomerSchema.shape.notes.unwrap().nullable().optional(),
 });
 export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
 

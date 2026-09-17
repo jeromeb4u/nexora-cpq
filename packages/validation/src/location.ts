@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { countryCodeSchema, cuidSchema, emailSchema, nonEmptyString, phoneSchema, postalCodeSchema } from './common';
+import {
+  countryCodeSchema,
+  cuidSchema,
+  emailSchema,
+  nonEmptyString,
+  phoneSchema,
+  postalCodeSchema,
+} from './common';
 import { serviceabilitySchema } from './enums';
 
 export const createLocationSchema = z.object({
@@ -23,7 +30,18 @@ export const createLocationSchema = z.object({
 });
 export type CreateLocationInput = z.infer<typeof createLocationSchema>;
 
+/**
+ * Omitted key = leave unchanged; `null` on an optional column = clear it
+ * (see `updateCustomerSchema`).
+ */
 export const updateLocationSchema = createLocationSchema.partial().extend({
   id: cuidSchema,
+  addressLine2: createLocationSchema.shape.addressLine2.unwrap().nullable().optional(),
+  contactPhone: createLocationSchema.shape.contactPhone.unwrap().nullable().optional(),
+  existingConnectivity: createLocationSchema.shape.existingConnectivity
+    .unwrap()
+    .nullable()
+    .optional(),
+  maxBandwidthMbps: createLocationSchema.shape.maxBandwidthMbps.unwrap().nullable().optional(),
 });
 export type UpdateLocationInput = z.infer<typeof updateLocationSchema>;

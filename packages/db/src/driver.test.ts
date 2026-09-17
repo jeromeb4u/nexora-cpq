@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { driverFor } from './driver';
+import { driverFor, pgPoolOptions } from './driver';
 
 describe('database driver selection', () => {
   it('uses the Neon serverless driver for Neon hosts', () => {
     expect(
-      driverFor('postgresql://u:p@ep-cool-name-123-pooler.c-5.eu-central-1.aws.neon.tech/db?sslmode=require'),
+      driverFor(
+        'postgresql://u:p@ep-cool-name-123-pooler.c-5.eu-central-1.aws.neon.tech/db?sslmode=require',
+      ),
     ).toBe('neon');
   });
 
@@ -22,5 +24,22 @@ describe('database driver selection', () => {
 
   it('falls back to node-postgres for an unparseable string', () => {
     expect(driverFor('not a url')).toBe('pg');
+  });
+});
+
+describe('node-postgres pool options', () => {
+  it('is empty unless configured', () => {
+    expect(pgPoolOptions({})).toEqual({});
+  });
+
+  it('reads positive integers', () => {
+    expect(pgPoolOptions({ PG_POOL_MAX: '1', PG_POOL_IDLE_TIMEOUT_MS: '1' })).toEqual({
+      max: 1,
+      idleTimeoutMillis: 1,
+    });
+  });
+
+  it('ignores values that would misconfigure the pool', () => {
+    expect(pgPoolOptions({ PG_POOL_MAX: '0', PG_POOL_IDLE_TIMEOUT_MS: 'soon' })).toEqual({});
   });
 });

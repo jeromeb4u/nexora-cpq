@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
 import { Check } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  PageHeader,
-} from '@nexora/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, PageHeader } from '@nexora/ui';
 import { Permission, ROLE_LABELS, ROLE_PERMISSIONS } from '@nexora/auth/permissions';
 
 import { requireSession } from '@/lib/session';
