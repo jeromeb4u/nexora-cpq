@@ -103,7 +103,6 @@ export function AppShell({
           onSignOut={onSignOut}
           notificationCount={notificationCount}
           notificationsHref={notificationsHref}
-          linkComponent={linkComponent}
           search={search}
           menuButton={
             <button

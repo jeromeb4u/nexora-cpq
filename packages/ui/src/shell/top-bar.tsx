@@ -5,18 +5,27 @@ import { Bell, ChevronDown, LogOut, Settings, User as UserIcon } from 'lucide-re
 import { DropdownMenu } from 'radix-ui';
 
 import { cn } from '../lib/cn';
-import type { ShellLinkComponent, ShellUser } from './types';
+import type { ShellUser } from './types';
 
 export interface TopBarProps {
   readonly user: ShellUser;
   readonly onSignOut: () => void;
   readonly notificationCount: number;
   readonly notificationsHref?: string;
-  readonly linkComponent: ShellLinkComponent;
   readonly search?: ReactNode;
   readonly menuButton?: ReactNode;
 }
 
+/**
+ * Every link in the top bar is a plain anchor, deliberately.
+ *
+ * This bar renders inside BOTH micro frontends, but Profile, Settings and the
+ * notifications feed are all owned by Platform. Inside CPQ, a client-side
+ * `next/link` transition would ask CPQ's router for `/profile` — a route it
+ * does not have — and 404. A real navigation lets the edge route it to the
+ * right application. Same-zone links (the sidebar) still use the injected
+ * link component; see `crossZone` in nav-items.ts.
+ */
 const menuItemClass =
   'flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-[var(--text-secondary)] outline-none data-[highlighted]:bg-[var(--surface-hover)] data-[highlighted]:text-[var(--text-primary)]';
 
@@ -25,7 +34,6 @@ export function TopBar({
   onSignOut,
   notificationCount,
   notificationsHref,
-  linkComponent: Link,
   search,
   menuButton,
 }: TopBarProps) {
@@ -44,7 +52,7 @@ export function TopBar({
       <div className="min-w-0 flex-1">{search}</div>
 
       {notificationsHref ? (
-        <Link
+        <a
           href={notificationsHref}
           className="relative rounded-sm p-1.5 text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
         >
@@ -62,7 +70,7 @@ export function TopBar({
               {notificationCount > 9 ? '9+' : notificationCount}
             </span>
           ) : null}
-        </Link>
+        </a>
       ) : null}
 
       <DropdownMenu.Root>
@@ -106,16 +114,16 @@ export function TopBar({
 
             <div className="py-1">
               <DropdownMenu.Item asChild>
-                <Link href="/profile" className={menuItemClass}>
+                <a href="/profile" className={menuItemClass}>
                   <UserIcon className="size-4" aria-hidden />
                   Profile
-                </Link>
+                </a>
               </DropdownMenu.Item>
               <DropdownMenu.Item asChild>
-                <Link href="/settings" className={menuItemClass}>
+                <a href="/settings" className={menuItemClass}>
                   <Settings className="size-4" aria-hidden />
                   Settings
-                </Link>
+                </a>
               </DropdownMenu.Item>
             </div>
 

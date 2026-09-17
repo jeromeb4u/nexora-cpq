@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 
+import { THEME_INIT_SCRIPT } from '@nexora/ui';
+
 import './globals.css';
 
 /**
@@ -40,6 +42,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Applies a stored theme before first paint, so dark mode does not flash light. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         {children}
         <Toaster
