@@ -5,6 +5,7 @@ import { type ErrorCode, isAppError } from '@nexora/observability';
 
 import { USERS, acmeGmbh, actorFor, foreignLocation, uniqueVatNumber } from '@/test/fixtures';
 import { createCustomer, createLocation, updateCustomer, updateLocation } from './customer-service';
+import { markAllNotificationsRead, markNotificationRead } from './notification-service';
 
 /**
  * Customer and location services, end to end against real PostgreSQL.
@@ -227,5 +228,39 @@ describe('locations', () => {
       where: { id: location.id },
     });
     expect(unchanged.name).toBe(location.name);
+  });
+});
+
+describe('notifications', () => {
+  it('marks only your own notifications read', async () => {
+    const [mine, theirs] = await Promise.all([
+      prisma.notification.create({
+        data: { type: 'QUOTE_ACCEPTED', title: 'Yours', body: 'For you', userId: rep.id },
+      }),
+      prisma.notification.create({
+        data: { type: 'QUOTE_ACCEPTED', title: 'Theirs', body: 'Not for you', userId: otherRep.id },
+      }),
+    ]);
+
+    // Someone else's id matches nothing rather than erroring — it simply is
+    // not in this user's scope.
+    const foreign = await markNotificationRead(rep, { notificationId: theirs.id });
+    expect(foreign.data.read).toBe(0);
+
+    const own = await markNotificationRead(rep, { notificationId: mine.id });
+    expect(own.data.read).toBe(1);
+
+    const all = await markAllNotificationsRead(rep);
+    expect(all.data.read).toBeGreaterThanOrEqual(0);
+
+    const [after, untouched] = await Promise.all([
+      prisma.notification.findUniqueOrThrow({ where: { id: mine.id } }),
+      prisma.notification.findUniqueOrThrow({ where: { id: theirs.id } }),
+    ]);
+    expect(after.readAt).not.toBeNull();
+    expect(untouched.readAt).toBeNull();
+
+    const remaining = await prisma.notification.count({ where: { userId: rep.id, readAt: null } });
+    expect(remaining).toBe(0);
   });
 });

@@ -52,7 +52,7 @@ export function AppChrome({
       linkComponent={Link}
       onSignOut={handleSignOut}
       notificationCount={unreadNotifications}
-      notificationsHref="/activity"
+      notificationsHref="/notifications"
     >
       {children}
     </AppShell>

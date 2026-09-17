@@ -47,3 +47,4 @@ export * from './quote';
 export * from './configuration';
 export * from './approval';
 export * from './auth';
+export * from './notification';

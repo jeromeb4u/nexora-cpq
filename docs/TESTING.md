@@ -90,6 +90,7 @@ microfrontends proxy** on `http://localhost:3024` — the same composition users
 
 | Spec | Scenario |
 |---|---|
+| `notifications.spec.ts` | An approver opens their notifications from the bell, marks them all read, and the badge stays gone after a reload. |
 | `quote-journey.spec.ts` | A sales rep creates a customer and site, raises a quote, configures it, and sends it for approval. |
 | `approval.spec.ts` | A sales manager approves an escalated discount from the queue; the quote shows the approval. |
 | `access-control.spec.ts` | A rep is denied the approval queue, gets the not-found page (with nothing about the quote) for another rep's quote, cannot find it in search, and is sent to sign-in when signed out. |

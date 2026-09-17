@@ -62,7 +62,7 @@ Set on **both** projects unless noted.
 | `EMAIL_PROVIDER` | `console` for the demo. No credentials needed, and no mail is sent. |
 | `EMAIL_FROM` | e.g. `quotes@nexora-telecom.demo` |
 | `LOG_LEVEL` | `info` in production. |
-| `NEXT_PUBLIC_DEMO_MODE` | `true` shows the demo credential picker on sign-in. |
+| `NEXT_PUBLIC_DEMO_MODE` | `false` hides the demo credential picker on sign-in. Any other value (including unset) shows it. |
 
 `AUTH_TRUSTED_ORIGINS` also accepts preview deployments; `VERCEL_URL` is trusted
 automatically so branch previews authenticate without extra configuration.

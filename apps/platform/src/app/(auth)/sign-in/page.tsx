@@ -51,7 +51,7 @@ export default async function SignInPage({
         </p>
       </div>
 
-      <SignInForm nextPath={nextPath} />
+      <SignInForm nextPath={nextPath} demoMode={process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'} />
 
       <p className="text-2xs mt-10 max-w-sm text-center leading-relaxed text-[var(--text-tertiary)]">
         Nexora Telecom is a fictional company created for this portfolio project. All customers,

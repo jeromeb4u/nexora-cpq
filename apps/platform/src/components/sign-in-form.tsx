@@ -29,7 +29,18 @@ const DEMO_ACCOUNTS = [
 
 const DEMO_PASSWORD = 'NexoraDemo123!';
 
-export function SignInForm({ nextPath }: { nextPath: string }) {
+export interface SignInFormProps {
+  readonly nextPath: string;
+  /**
+   * Whether to offer the seeded demo accounts. Driven by NEXT_PUBLIC_DEMO_MODE,
+   * which is on unless set to "false": publishing these credentials is only
+   * acceptable because every account here is fictional, so a deployment that is
+   * not a demo can switch the panel off.
+   */
+  readonly demoMode: boolean;
+}
+
+export function SignInForm({ nextPath, demoMode }: SignInFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -101,35 +112,39 @@ export function SignInForm({ nextPath }: { nextPath: string }) {
         </Button>
       </form>
 
-      <div className="mt-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-sunken)] p-4">
-        <p className="text-xs font-medium text-[var(--text-primary)]">Demo accounts</p>
-        <p className="text-2xs mt-1 leading-relaxed text-[var(--text-tertiary)]">
-          This is a fictional demonstration system. Choose a role to sign in — each sees a different
-          slice of the product.
-        </p>
+      {demoMode ? (
+        <div className="mt-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-sunken)] p-4">
+          <p className="text-xs font-medium text-[var(--text-primary)]">Demo accounts</p>
+          <p className="text-2xs mt-1 leading-relaxed text-[var(--text-tertiary)]">
+            This is a fictional demonstration system. Choose a role to sign in — each sees a
+            different slice of the product.
+          </p>
 
-        <ul className="mt-3 space-y-1.5">
-          {DEMO_ACCOUNTS.map((account) => (
-            <li key={account.email}>
-              <button
-                type="button"
-                onClick={() => fillDemoAccount(account.email)}
-                disabled={busy}
-                className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-3 py-2 text-left transition-colors hover:border-[var(--accent-border)] hover:bg-[var(--surface-selected)] disabled:opacity-50"
-              >
-                <span className="block text-xs font-medium text-[var(--text-primary)]">
-                  {account.label}
-                </span>
-                <span className="text-2xs block text-[var(--text-tertiary)]">{account.detail}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+          <ul className="mt-3 space-y-1.5">
+            {DEMO_ACCOUNTS.map((account) => (
+              <li key={account.email}>
+                <button
+                  type="button"
+                  onClick={() => fillDemoAccount(account.email)}
+                  disabled={busy}
+                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-3 py-2 text-left transition-colors hover:border-[var(--accent-border)] hover:bg-[var(--surface-selected)] disabled:opacity-50"
+                >
+                  <span className="block text-xs font-medium text-[var(--text-primary)]">
+                    {account.label}
+                  </span>
+                  <span className="text-2xs block text-[var(--text-tertiary)]">
+                    {account.detail}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
 
-        <p className="text-2xs mt-3 font-mono text-[var(--text-tertiary)]">
-          Password for all accounts: {DEMO_PASSWORD}
-        </p>
-      </div>
+          <p className="text-2xs mt-3 font-mono text-[var(--text-tertiary)]">
+            Password for all accounts: {DEMO_PASSWORD}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
