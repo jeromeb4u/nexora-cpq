@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Breadcrumbs, PageHeader } from '@nexora/ui';
 import { Permission } from '@nexora/auth/permissions';
 import { ErrorCode, isAppError } from '@nexora/observability';
 import { type ContractTerm, CONTRACT_TERMS } from '@nexora/types';
+import { isEditable } from '@nexora/cpq-engine';
 
 import { requirePagePermission } from '@/lib/session';
 import { getQuoteDetail } from '@/lib/quotes';
@@ -39,6 +40,10 @@ export default async function ConfigurePage({
 
   const { quote, canEdit } = detail;
   if (!canEdit) notFound();
+  // Quotes in review, approval or with the customer are reopened from the
+  // detail page first, so the state machine records it; the configurator never
+  // edits them in place.
+  if (!isEditable(quote.status)) redirect(`/quotes/${quote.id}`);
 
   const [catalogue, rules] = await Promise.all([loadCatalogue(), loadRules()]);
 

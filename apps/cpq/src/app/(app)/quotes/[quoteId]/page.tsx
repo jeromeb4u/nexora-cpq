@@ -2,12 +2,16 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { Breadcrumbs, PageHeader, StatusBadge } from '@nexora/ui';
-import { Permission } from '@nexora/auth/permissions';
+import { Permission, canDecideApproval } from '@nexora/auth/permissions';
+import { canTransition } from '@nexora/cpq-engine';
 import { ErrorCode, isAppError } from '@nexora/observability';
 
 import { requirePagePermission } from '@/lib/session';
 import { getQuoteAudit, getQuoteDetail } from '@/lib/quotes';
 import { requestInstant } from '@/lib/now';
+import { quoteActionsFor } from '@/lib/quote-action-model';
+import { QuoteActionBar } from '@/components/quote-detail/quote-action-bar';
+import { DocumentGenerator } from '@/components/quote-detail/document-generator';
 import { PricingSummary } from '@/components/quote-detail/pricing-summary';
 import { LineItemsTable } from '@/components/quote-detail/line-items-table';
 import { VersionHistoryTable } from '@/components/quote-detail/version-history-table';
@@ -30,7 +34,7 @@ const loadQuote = cache(async (quoteId: string) => {
   const actor = await requirePagePermission(Permission.QUOTE_READ_OWN);
 
   try {
-    return await getQuoteDetail(actor, quoteId);
+    return { actor, ...(await getQuoteDetail(actor, quoteId)) };
   } catch (error) {
     if (isAppError(error, ErrorCode.NOT_FOUND)) {
       notFound();
@@ -49,9 +53,13 @@ export async function generateMetadata({
   return { title: quote.quoteNumber };
 }
 
+
 /**
- * Read-only quote detail: pricing, line items, version history, approvals,
- * and the audit trail. Nothing on this page mutates data.
+ * Quote detail: pricing, line items, version history, approvals, the audit
+ * trail, and the lifecycle actions this viewer may take.
+ *
+ * Actions are derived from the state machine for display only; each one is
+ * re-authorized by its server action.
  */
 export default async function QuoteDetailPage({
   params,
@@ -59,10 +67,43 @@ export default async function QuoteDetailPage({
   params: Promise<QuotePageParams>;
 }) {
   const { quoteId } = await params;
-  const { quote } = await loadQuote(quoteId);
+  const { actor, quote, canEdit } = await loadQuote(quoteId);
   const auditEvents = await getQuoteAudit(quote.id);
 
   const now = requestInstant();
+
+  const canDecide = canDecideApproval({
+    actorId: actor.id,
+    actorRole: actor.role,
+    quoteOwnerId: quote.ownerId,
+    teamMemberIds: [],
+  });
+
+  const actions = quoteActionsFor({
+    quoteId: quote.id,
+    quoteNumber: quote.quoteNumber,
+    status: quote.status,
+    ownerId: quote.ownerId,
+    actorId: actor.id,
+    actorRole: actor.role,
+    canEdit,
+    canDecide,
+    hasVersion: (quote.currentVersion?.items.length ?? 0) > 0,
+    recipientEmail: quote.location?.contactEmail ?? quote.customer.email,
+  });
+
+  // Restoring re-enters configuration, so it is offered exactly when that
+  // transition is (or configuration is already under way).
+  const canRestore =
+    canEdit &&
+    (quote.status === 'CONFIGURING' ||
+      canTransition({
+        from: quote.status,
+        to: 'CONFIGURING',
+        actorRole: actor.role,
+        actorId: actor.id,
+        quoteOwnerId: quote.ownerId,
+      }).allowed);
 
   return (
     <div className="space-y-5">
@@ -80,12 +121,30 @@ export default async function QuoteDetailPage({
             ? `${quote.customer.companyName} · ${quote.location.name}`
             : quote.customer.companyName
         }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {quote.currentVersion && quote.currentVersion.items.length > 0 ? (
+              <DocumentGenerator quoteId={quote.id} quoteNumber={quote.quoteNumber} />
+            ) : null}
+            <QuoteActionBar
+              quoteId={quote.id}
+              quoteNumber={quote.quoteNumber}
+              currentVersionId={quote.currentVersionId}
+              actions={actions}
+            />
+          </div>
+        }
       />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="order-2 flex flex-col gap-5 xl:order-1">
           <LineItemsTable items={quote.currentVersion?.items ?? []} />
-          <VersionHistoryTable versions={quote.versions} now={now} />
+          <VersionHistoryTable
+            quoteId={quote.id}
+            versions={quote.versions}
+            canRestore={canRestore}
+            now={now}
+          />
           <ApprovalsList approvals={quote.approvals} now={now} />
           <AuditTimeline events={auditEvents} now={now} />
         </div>

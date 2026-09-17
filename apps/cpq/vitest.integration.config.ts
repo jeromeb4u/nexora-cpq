@@ -13,6 +13,9 @@ import { assertDisposableDatabase } from './src/test/database-guard';
 const databaseUrl = assertDisposableDatabase(process.env.TEST_DATABASE_URL);
 
 export default defineConfig({
+  // tsconfig says jsx: preserve because Next compiles JSX itself; tests must
+  // transform it here instead.
+  oxc: { jsx: { runtime: 'automatic' } },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

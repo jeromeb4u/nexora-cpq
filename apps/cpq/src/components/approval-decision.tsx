@@ -20,6 +20,11 @@ import { decideApproval } from '@/lib/actions/quote-actions';
 export interface ApprovalDecisionProps {
   readonly approvalId: string;
   readonly quoteNumber: string;
+  /**
+   * Whether this approver's own authority covers the requested discount. When
+   * it does not they may still reject, and the server refuses an approval anyway.
+   */
+  readonly canApprove: boolean;
 }
 
 /**
@@ -34,7 +39,7 @@ export interface ApprovalDecisionProps {
  * discriminated union where REJECTED requires a note, so the server would
  * refuse a rejection without one regardless.
  */
-export function ApprovalDecision({ approvalId, quoteNumber }: ApprovalDecisionProps) {
+export function ApprovalDecision({ approvalId, quoteNumber, canApprove }: ApprovalDecisionProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -81,10 +86,14 @@ export function ApprovalDecision({ approvalId, quoteNumber }: ApprovalDecisionPr
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={handleApprove} isLoading={isPending} disabled={isPending}>
-          Approve
-        </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        {canApprove ? (
+          <Button onClick={handleApprove} isLoading={isPending} disabled={isPending}>
+            Approve
+          </Button>
+        ) : (
+          <span className="text-2xs text-[var(--text-tertiary)]">Above your approval authority</span>
+        )}
         <Button
           variant="outline"
           onClick={() => setRejectOpen(true)}

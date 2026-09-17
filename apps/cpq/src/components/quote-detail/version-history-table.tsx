@@ -15,6 +15,7 @@ import {
 import { bpsToRate, cents, formatMoney, formatRate } from '@nexora/types';
 import { cn } from '../cn';
 import { RelativeTime } from '../relative-time';
+import { RestoreVersionButton } from './restore-version-button';
 
 export interface QuoteVersionRow {
   readonly id: string;
@@ -29,7 +30,10 @@ export interface QuoteVersionRow {
 }
 
 export interface VersionHistoryTableProps {
+  readonly quoteId: string;
   readonly versions: readonly QuoteVersionRow[];
+  /** Whether the viewer may bring an older version back as a new one. */
+  readonly canRestore: boolean;
   /** Epoch ms captured once by the page, so all timestamps share one instant. */
   readonly now: number;
 }
@@ -41,7 +45,7 @@ export interface VersionHistoryTableProps {
  * this table is direct proof that history is never overwritten — the current
  * version is the one row where `supersededAt` is still null.
  */
-export function VersionHistoryTable({ versions, now }: VersionHistoryTableProps) {
+export function VersionHistoryTable({ quoteId, versions, canRestore, now }: VersionHistoryTableProps) {
   if (versions.length === 0) {
     return (
       <Card>
@@ -69,6 +73,9 @@ export function VersionHistoryTable({ versions, now }: VersionHistoryTableProps)
             <TableHead>Created by</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead className="text-right">
+              <span className="sr-only">Actions</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -96,6 +103,24 @@ export function VersionHistoryTable({ versions, now }: VersionHistoryTableProps)
                   ) : (
                     <Badge tone="neutral">Superseded</Badge>
                   )}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-right">
+                  <a
+                    href={`/quotes/${quoteId}/document?version=${version.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mr-1 text-sm text-[var(--text-link)] hover:underline"
+                    aria-label={`Open PDF of version ${version.versionNumber}`}
+                  >
+                    PDF
+                  </a>
+                  {canRestore && !isCurrent ? (
+                    <RestoreVersionButton
+                      quoteId={quoteId}
+                      versionId={version.id}
+                      versionNumber={version.versionNumber}
+                    />
+                  ) : null}
                 </TableCell>
               </TableRow>
             );

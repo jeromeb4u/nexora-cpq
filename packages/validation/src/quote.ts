@@ -63,3 +63,7 @@ export type CreateRevisionInput = z.infer<typeof createRevisionSchema>;
 /** Identifies a quote for actions that need nothing else (e.g. document generation). */
 export const quoteIdSchema = z.object({ quoteId: cuidSchema });
 export type QuoteIdInput = z.infer<typeof quoteIdSchema>;
+
+/** Body of a document generation request; omitting the version means the current one. */
+export const generateDocumentSchema = z.object({ versionId: cuidSchema.optional() }).strict();
+export type GenerateDocumentInput = z.infer<typeof generateDocumentSchema>;

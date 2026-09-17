@@ -16,6 +16,7 @@ import {
 } from '@nexora/ui';
 import { Permission } from '@nexora/auth/permissions';
 import { bpsToRate, cents, formatMoney, formatRate } from '@nexora/types';
+import { canApproveDiscount } from '@nexora/cpq-engine';
 
 import { requirePagePermission } from '@/lib/session';
 import { requestInstant } from '@/lib/now';
@@ -107,6 +108,7 @@ export default async function ApprovalsPage() {
                     <ApprovalDecision
                       approvalId={approval.id}
                       quoteNumber={approval.quote.quoteNumber}
+                      canApprove={canApproveDiscount(actor.role, approval.requestedDiscountBps)}
                     />
                   </CardHeader>
 
