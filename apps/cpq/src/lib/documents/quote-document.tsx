@@ -40,10 +40,24 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 22 },
   brand: { flexDirection: 'row', alignItems: 'flex-end' },
-  brandName: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: INK },
-  brandSuffix: { fontSize: 8, letterSpacing: 2, color: MUTED, marginLeft: 5, marginBottom: 4 },
-  brandAddress: { fontSize: 8, color: MUTED, marginTop: 4 },
-  docTitle: { fontSize: 16, fontFamily: 'Helvetica-Bold', textAlign: 'right', color: BRAND },
+  brandName: { fontSize: 20, lineHeight: 1, fontFamily: 'Helvetica-Bold', color: INK },
+  brandSuffix: {
+    fontSize: 7,
+    lineHeight: 1,
+    letterSpacing: 2,
+    color: MUTED,
+    marginLeft: 6,
+    marginBottom: 2,
+  },
+  brandAddress: { fontSize: 8, color: MUTED, marginTop: 8 },
+  docTitle: {
+    fontSize: 16,
+    lineHeight: 1,
+    fontFamily: 'Helvetica-Bold',
+    textAlign: 'right',
+    color: BRAND,
+    marginBottom: 6,
+  },
   metaRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 2 },
   metaLabel: { color: MUTED, width: 70, textAlign: 'right', marginRight: 8 },
   metaValue: { fontFamily: 'Helvetica-Bold', width: 92, textAlign: 'right' },
@@ -76,7 +90,12 @@ const styles = StyleSheet.create({
     borderBottomColor: RULE,
     paddingVertical: 5,
   },
-  headRow: { flexDirection: 'row', paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: INK },
+  headRow: {
+    flexDirection: 'row',
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: INK,
+  },
   headCell: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: MUTED, letterSpacing: 0.5 },
   colSku: { width: 78 },
   colName: { flex: 1, paddingRight: 6 },
@@ -96,24 +115,30 @@ const styles = StyleSheet.create({
   twoColumn: { flexDirection: 'row', marginBottom: 16 },
   column: { flex: 1, paddingRight: 16 },
   box: { borderWidth: 0.75, borderColor: RULE, borderRadius: 4, padding: 10 },
-  term: { flexDirection: 'row', marginBottom: 3 },
-  termNumber: { width: 14, color: MUTED },
-  termText: { flex: 1, color: MUTED },
-  signatures: { flexDirection: 'row', marginTop: 8 },
+  term: { flexDirection: 'row', marginBottom: 2 },
+  termNumber: { width: 12, fontSize: 8, color: MUTED },
+  termText: { flex: 1, fontSize: 8, color: MUTED },
+  signatures: { flexDirection: 'row', marginTop: 4 },
   signature: { flex: 1, paddingRight: 24 },
-  signatureLine: { borderBottomWidth: 0.75, borderBottomColor: INK, height: 30, marginBottom: 4 },
+  signatureLine: { borderBottomWidth: 0.75, borderBottomColor: INK, height: 26, marginBottom: 3 },
   footer: {
     position: 'absolute',
-    bottom: 26,
+    bottom: 24,
     left: 44,
     right: 44,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     fontSize: 7,
     color: FAINT,
-    borderTopWidth: 0.5,
-    borderTopColor: RULE,
-    paddingTop: 6,
+  },
+  // Anchored from the top: react-pdf 4 drops bottom-anchored text that uses a
+  // render prop, because its height is unknown at first layout.
+  pageNumber: {
+    position: 'absolute',
+    top: 808,
+    left: 44,
+    right: 44,
+    fontSize: 7,
+    color: FAINT,
+    textAlign: 'right',
   },
 });
 
@@ -150,13 +175,22 @@ function ApprovalStatement({ approval }: { readonly approval: QuoteDocumentModel
       return (
         <Text>
           Commercial terms approved by <Text style={styles.strong}>{approval.approverName}</Text> on{' '}
-          {longDate(approval.decidedAt)}, including a negotiated discount of {rate(approval.discountBps)}.
+          {longDate(approval.decidedAt)}, including a negotiated discount of{' '}
+          {rate(approval.discountBps)}.
         </Text>
       );
     case 'WITHIN_AUTHORITY':
-      return <Text>Commercial terms are within standard sales authority. No escalation was required.</Text>;
+      return (
+        <Text>
+          Commercial terms are within standard sales authority. No escalation was required.
+        </Text>
+      );
     case 'PENDING':
-      return <Text>Commercial terms are awaiting internal approval. This document is not yet an offer.</Text>;
+      return (
+        <Text>
+          Commercial terms are awaiting internal approval. This document is not yet an offer.
+        </Text>
+      );
     case 'NOT_APPROVED':
     default:
       return <Text>Commercial terms have not been approved. This document is not an offer.</Text>;
@@ -188,7 +222,9 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
               <Text style={styles.brandName}>Nexora</Text>
               <Text style={styles.brandSuffix}>TELECOM</Text>
             </View>
-            <Text style={styles.brandAddress}>Nexora Telecom GmbH · Friedrichstraße 88 · 10117 Berlin</Text>
+            <Text style={styles.brandAddress}>
+              Nexora Telecom GmbH · Friedrichstraße 88 · 10117 Berlin
+            </Text>
           </View>
           <View>
             <Text style={styles.docTitle}>{binding ? 'Quotation' : 'Draft quotation'}</Text>
@@ -202,7 +238,9 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Valid until</Text>
-              <Text style={styles.metaValue}>{model.validUntil ? longDate(model.validUntil) : 'On approval'}</Text>
+              <Text style={styles.metaValue}>
+                {model.validUntil ? longDate(model.validUntil) : 'On approval'}
+              </Text>
             </View>
           </View>
         </View>
@@ -279,7 +317,9 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
               <Text style={styles.colQty}>{line.quantity}</Text>
               <Text style={styles.colMoney}>{money(line.unitMonthlyCents)}</Text>
               <Text style={styles.colMoney}>{money(line.monthlyCents)}</Text>
-              <Text style={styles.colMoney}>{line.setupCents > 0 ? money(line.setupCents) : '—'}</Text>
+              <Text style={styles.colMoney}>
+                {line.setupCents > 0 ? money(line.setupCents) : '—'}
+              </Text>
             </View>
           ))}
         </View>
@@ -299,7 +339,9 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
               </View>
             ))}
             <View style={styles.totalsRow}>
-              <Text style={styles.muted}>Total monthly discount ({rate(model.effectiveDiscountBps)} effective)</Text>
+              <Text style={styles.muted}>
+                Total monthly discount ({rate(model.effectiveDiscountBps)} effective)
+              </Text>
               <Text>-{money(model.totals.discountMonthlyCents)}</Text>
             </View>
             <View style={styles.totalsGrand}>
@@ -311,9 +353,7 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
               <Text>{money(model.totals.otcCents)}</Text>
             </View>
             <View style={styles.totalsRow}>
-              <Text style={styles.muted}>
-                Total over {model.contractMonths} months
-              </Text>
+              <Text style={styles.muted}>Total over {model.contractMonths} months</Text>
               <Text style={styles.strong}>{money(model.totals.tcvCents)}</Text>
             </View>
           </View>
@@ -340,7 +380,7 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
         <View wrap={false}>
           <Text style={styles.sectionTitle}>Acceptance</Text>
           <Text style={styles.muted}>
-            Signed on behalf of {model.customer.legalName}, accepting this quotation on the terms above.
+            Signed for {model.customer.legalName}, accepting this quotation on the terms above.
           </Text>
           <View style={styles.signatures}>
             {['Name and position', 'Signature', 'Date'].map((label) => (
@@ -352,12 +392,15 @@ export function QuoteDocument({ model }: { readonly model: QuoteDocumentModel })
           </View>
         </View>
 
-        <View style={styles.footer} fixed>
-          <Text>
-            {reference} · Nexora Telecom is a fictional company; this document was produced by a portfolio demonstration.
-          </Text>
-          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-        </View>
+        <Text style={styles.footer} fixed>
+          {reference} · Nexora Telecom is a fictional company; this document was produced by a
+          portfolio demonstration.
+        </Text>
+        <Text
+          style={styles.pageNumber}
+          fixed
+          render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+        />
       </Page>
     </Document>
   );

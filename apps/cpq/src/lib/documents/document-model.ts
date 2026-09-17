@@ -48,7 +48,11 @@ export interface QuoteDocumentModel {
   }[];
 
   /** Discounts as applied at save time: term-based and negotiated, with amounts. */
-  readonly discounts: readonly { readonly label: string; readonly rate: number; readonly amountCents: number }[];
+  readonly discounts: readonly {
+    readonly label: string;
+    readonly rate: number;
+    readonly amountCents: number;
+  }[];
 
   readonly totals: {
     readonly grossMonthlyCents: number;
@@ -59,7 +63,12 @@ export interface QuoteDocumentModel {
   };
 
   readonly approval:
-    | { readonly kind: 'APPROVED'; readonly approverName: string; readonly decidedAt: Date; readonly discountBps: number }
+    | {
+        readonly kind: 'APPROVED';
+        readonly approverName: string;
+        readonly decidedAt: Date;
+        readonly discountBps: number;
+      }
     | { readonly kind: 'WITHIN_AUTHORITY' }
     | { readonly kind: 'PENDING' }
     | { readonly kind: 'NOT_APPROVED' };
@@ -99,10 +108,14 @@ export function pricingIntegrityIssues(version: StoredPricing): string[] {
   const lineSetup = sum(version.items.map((item) => item.setupCents));
 
   if (lineMonthly !== version.grossMonthlyCents) {
-    issues.push(`line monthly subtotals (${lineMonthly}) do not equal gross monthly (${version.grossMonthlyCents})`);
+    issues.push(
+      `line monthly subtotals (${lineMonthly}) do not equal gross monthly (${version.grossMonthlyCents})`,
+    );
   }
   if (lineSetup !== version.grossSetupCents) {
-    issues.push(`line setup subtotals (${lineSetup}) do not equal gross setup (${version.grossSetupCents})`);
+    issues.push(
+      `line setup subtotals (${lineSetup}) do not equal gross setup (${version.grossSetupCents})`,
+    );
   }
   if (version.grossMonthlyCents - version.discountMonthlyCents !== version.mrrCents) {
     issues.push('gross monthly minus discount does not equal MRR');

@@ -53,3 +53,6 @@ next-env.d.ts
 
 # ad-hoc verification scripts
 packages/db/prisma/check-*.ts
+
+# Local email capture (EMAIL_PROVIDER=filesystem)
+.mail/

@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { renderToBuffer } from '@react-pdf/renderer';
 
@@ -100,5 +101,23 @@ describe('quote document', () => {
 
     expect(bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     expect(bytes.length).toBeGreaterThan(2_000);
+
+    // Set PDF_PREVIEW_PATH to write the rendered file somewhere you can open it.
+    if (process.env.PDF_PREVIEW_PATH) await writeFile(process.env.PDF_PREVIEW_PATH, bytes);
+  }, 30_000);
+
+  it('renders a draft with its watermark and a not-an-offer approval statement', async () => {
+    const draft: QuoteDocumentModel = {
+      ...model,
+      status: 'CONFIGURING',
+      validUntil: null,
+      approval: { kind: 'NOT_APPROVED' },
+    };
+    const bytes = await renderToBuffer(QuoteDocument({ model: draft }));
+
+    expect(bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
+    if (process.env.PDF_PREVIEW_PATH) {
+      await writeFile(process.env.PDF_PREVIEW_PATH.replace(/[.]pdf$/, '-draft.pdf'), bytes);
+    }
   }, 30_000);
 });

@@ -80,7 +80,7 @@ function trustedOrigins(): string[] {
 
 export const auth = betterAuth({
   secret: requiredSecret(),
-  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3024',
   trustedOrigins: trustedOrigins(),
 
   database: prismaAdapter(prisma, {

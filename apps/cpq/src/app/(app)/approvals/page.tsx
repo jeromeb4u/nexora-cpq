@@ -146,8 +146,8 @@ export default async function ApprovalsPage() {
                           <>
                             {' '}
                             Effective discount across the quote is{' '}
-                            {formatRate(bpsToRate(version.effectiveDiscountBps))}, because some
-                            products cap their own discount.
+                            {formatRate(bpsToRate(version.effectiveDiscountBps))}, after the
+                            contract-term discount and any per-product discount caps.
                           </>
                         ) : null}
                       </p>

@@ -92,13 +92,11 @@ export function ApprovalDecision({ approvalId, quoteNumber, canApprove }: Approv
             Approve
           </Button>
         ) : (
-          <span className="text-2xs text-[var(--text-tertiary)]">Above your approval authority</span>
+          <span className="text-2xs text-[var(--text-tertiary)]">
+            Above your approval authority
+          </span>
         )}
-        <Button
-          variant="outline"
-          onClick={() => setRejectOpen(true)}
-          disabled={isPending}
-        >
+        <Button variant="outline" onClick={() => setRejectOpen(true)} disabled={isPending}>
           Reject
         </Button>
       </div>
@@ -119,19 +117,21 @@ export function ApprovalDecision({ approvalId, quoteNumber, canApprove }: Approv
             </DialogDescription>
           </DialogHeader>
 
-          <Field
-            label="Reason for rejection"
-            required
-            error={noteError}
-            description="Minimum 10 characters."
-          >
-            <Textarea
-              rows={4}
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="e.g. Margin at 26% is below the floor for this segment. Re-bid at no more than 20%, or extend to a 60-month term."
-            />
-          </Field>
+          <div className="px-4 py-4">
+            <Field
+              label="Reason for rejection"
+              required
+              error={noteError}
+              description="Minimum 10 characters."
+            >
+              <Textarea
+                rows={4}
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                placeholder="e.g. Margin at 26% is below the floor for this segment. Re-bid at no more than 20%, or extend to a 60-month term."
+              />
+            </Field>
+          </div>
 
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRejectOpen(false)} disabled={isPending}>

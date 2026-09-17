@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
@@ -16,7 +17,7 @@ export function createFilesystemProvider(directory = resolve(process.cwd(), '.ma
     async send(message) {
       await mkdir(directory, { recursive: true });
       const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const file = join(directory, `${stamp}-${message.template}.html`);
+      const file = join(directory, `${stamp}-${randomUUID().slice(0, 8)}-${message.template}.html`);
       const document = `<!-- to: ${message.to} | from: ${message.from} | subject: ${message.subject} -->\n${message.html}`;
       await writeFile(file, document, 'utf8');
       return { provider: 'filesystem', id: file };

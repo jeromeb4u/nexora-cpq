@@ -52,7 +52,13 @@ export interface DocumentGeneratorProps {
 }
 
 function initialSteps(): Record<StepId, StepState> {
-  return { prepare: 'pending', pricing: 'pending', validate: 'pending', render: 'pending', finalize: 'pending' };
+  return {
+    prepare: 'pending',
+    pricing: 'pending',
+    validate: 'pending',
+    render: 'pending',
+    finalize: 'pending',
+  };
 }
 
 function isStepId(value: unknown): value is StepId {
@@ -149,9 +155,13 @@ export function DocumentGenerator({
           } else if (event.event === 'error') {
             finished = true;
             const failedStep = data.step;
-            if (isStepId(failedStep)) setSteps((current) => ({ ...current, [failedStep]: 'failed' }));
+            if (isStepId(failedStep))
+              setSteps((current) => ({ ...current, [failedStep]: 'failed' }));
             setFailure({
-              message: typeof data.message === 'string' ? data.message : 'The document could not be generated.',
+              message:
+                typeof data.message === 'string'
+                  ? data.message
+                  : 'The document could not be generated.',
               reference: typeof data.reference === 'string' ? data.reference : null,
             });
           }
@@ -190,56 +200,70 @@ export function DocumentGenerator({
           <DialogHeader>
             <DialogTitle>Quote document — {quoteNumber}</DialogTitle>
             <DialogDescription>
-              Priced figures are verified and the configuration re-checked before the PDF is produced.
+              Priced figures are verified and the configuration re-checked before the PDF is
+              produced.
             </DialogDescription>
           </DialogHeader>
 
-          <Progress value={(completed / STEPS.length) * 100} aria-label="Document generation progress" />
+          <div className="space-y-4 px-4 py-4">
+            <Progress
+              value={(completed / STEPS.length) * 100}
+              aria-label="Document generation progress"
+            />
 
-          <ol className="space-y-2" aria-live="polite">
-            {STEPS.map((step) => {
-              const state = steps[step.id];
-              return (
-                <li key={step.id} className="flex items-center gap-2.5 text-sm">
-                  <span className="flex size-5 items-center justify-center" aria-hidden>
-                    {state === 'done' ? (
-                      <Check className="size-4 text-[var(--color-success-600)]" />
-                    ) : state === 'active' ? (
-                      <LoaderCircle className="size-4 animate-spin text-[var(--accent-solid)]" />
-                    ) : state === 'failed' ? (
-                      <CircleAlert className="size-4 text-[var(--color-danger-600)]" />
-                    ) : (
-                      <span className="size-1.5 rounded-full bg-[var(--border-strong)]" />
-                    )}
-                  </span>
-                  <span
-                    className={cn(
-                      state === 'pending' ? 'text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]',
-                      state === 'failed' && 'text-[var(--color-danger-600)]',
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                  <span className="sr-only">
-                    {state === 'done' ? 'complete' : state === 'active' ? 'in progress' : state === 'failed' ? 'failed' : 'waiting'}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+            <ol className="space-y-2" aria-live="polite">
+              {STEPS.map((step) => {
+                const state = steps[step.id];
+                return (
+                  <li key={step.id} className="flex items-center gap-2.5 text-sm">
+                    <span className="flex size-5 items-center justify-center" aria-hidden>
+                      {state === 'done' ? (
+                        <Check className="size-4 text-[var(--color-success-600)]" />
+                      ) : state === 'active' ? (
+                        <LoaderCircle className="size-4 animate-spin text-[var(--accent-solid)]" />
+                      ) : state === 'failed' ? (
+                        <CircleAlert className="size-4 text-[var(--color-danger-600)]" />
+                      ) : (
+                        <span className="size-1.5 rounded-full bg-[var(--border-strong)]" />
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        state === 'pending'
+                          ? 'text-[var(--text-tertiary)]'
+                          : 'text-[var(--text-primary)]',
+                        state === 'failed' && 'text-[var(--color-danger-600)]',
+                      )}
+                    >
+                      {step.label}
+                    </span>
+                    <span className="sr-only">
+                      {state === 'done'
+                        ? 'complete'
+                        : state === 'active'
+                          ? 'in progress'
+                          : state === 'failed'
+                            ? 'failed'
+                            : 'waiting'}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
 
-          {failure ? (
-            <Alert variant="danger" title="The document was not generated">
-              {failure.message}
-              {failure.reference ? ` Reference ${failure.reference}.` : ''}
-            </Alert>
-          ) : null}
+            {failure ? (
+              <Alert variant="danger" title="The document was not generated">
+                {failure.message}
+                {failure.reference ? ` Reference ${failure.reference}.` : ''}
+              </Alert>
+            ) : null}
 
-          {result ? (
-            <Alert variant="success" title="Document ready">
-              {result.fileName} · {Math.max(1, Math.round(result.byteLength / 1024))} KB
-            </Alert>
-          ) : null}
+            {result ? (
+              <Alert variant="success" title="Document ready">
+                {result.fileName} · {Math.max(1, Math.round(result.byteLength / 1024))} KB
+              </Alert>
+            ) : null}
+          </div>
 
           <DialogFooter>
             {failure ? (
