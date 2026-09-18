@@ -240,7 +240,11 @@ export interface QuoteSentInput {
 
 export function quoteSent(input: QuoteSentInput): EmailMessage {
   const validity = input.validUntil
-    ? input.validUntil.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? input.validUntil.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
     : null;
 
   return {

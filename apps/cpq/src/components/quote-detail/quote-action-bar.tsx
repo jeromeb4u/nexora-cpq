@@ -29,11 +29,18 @@ const VARIANT = {
  * so the buttons wait for the server and the page refreshes from the database
  * afterwards (§32). Irreversible or externally visible actions confirm first.
  */
-export function QuoteActionBar({ quoteId, quoteNumber, currentVersionId, actions }: QuoteActionBarProps) {
+export function QuoteActionBar({
+  quoteId,
+  quoteNumber,
+  currentVersionId,
+  actions,
+}: QuoteActionBarProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState<Extract<QuoteAction, { kind: 'transition' }> | null>(null);
+  const [confirming, setConfirming] = useState<Extract<QuoteAction, { kind: 'transition' }> | null>(
+    null,
+  );
 
   function run(action: Exclude<QuoteAction, { kind: 'link' }>) {
     setPendingId(action.id);

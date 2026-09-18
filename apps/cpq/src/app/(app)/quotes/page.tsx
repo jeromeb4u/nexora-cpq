@@ -37,10 +37,7 @@ export default async function QuotesPage({
 
   const now = requestInstant();
 
-  const [result, owners] = await Promise.all([
-    listQuotes(actor, query),
-    listVisibleOwners(actor),
-  ]);
+  const [result, owners] = await Promise.all([listQuotes(actor, query), listVisibleOwners(actor)]);
 
   return (
     <div className="space-y-5">

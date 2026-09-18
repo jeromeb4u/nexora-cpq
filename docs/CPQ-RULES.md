@@ -3,13 +3,13 @@
 Everything the business can argue about lives in `packages/cpq-engine`: four
 pure modules with no database, React or I/O dependency.
 
-| Module | Answers |
-|---|---|
+| Module             | Answers                                                       |
+| ------------------ | ------------------------------------------------------------- |
 | `configuration.ts` | Is this combination of products valid for this site and term? |
-| `pricing.ts` | What does it cost, line by line? |
-| `discount.ts` | Is this discount allowed, and if not, who may approve it? |
-| `quote-state.ts` | May this person move this quote to that status? |
-| `policy.ts` | The numbers: authority limits, term discounts, thresholds. |
+| `pricing.ts`       | What does it cost, line by line?                              |
+| `discount.ts`      | Is this discount allowed, and if not, who may approve it?     |
+| `quote-state.ts`   | May this person move this quote to that status?               |
+| `policy.ts`        | The numbers: authority limits, term discounts, thresholds.    |
 
 The same functions run in the configurator for instant feedback and on the
 server as the authority ([ADR-008](adr/ADR-008-isomorphic-engine.md)). The
@@ -28,23 +28,23 @@ salesperson. One interpreter evaluates all of them
 ([ADR-005](adr/ADR-005-rules-as-data.md)). Adding a rule is an insert, not a code
 change.
 
-| Trigger | Fires when |
-|---|---|
-| `PRODUCT_SELECTED` | a specific product is in the configuration |
-| `CATEGORY_SELECTED` | any product of a category (e.g. SD-WAN) is selected |
-| `BANDWIDTH_AT_LEAST` | the highest selected connectivity bandwidth is ≥ N Mbps |
-| `CONTRACT_TERM_AT_LEAST` | the term is ≥ N months |
-| `ALWAYS` | unconditionally |
+| Trigger                  | Fires when                                              |
+| ------------------------ | ------------------------------------------------------- |
+| `PRODUCT_SELECTED`       | a specific product is in the configuration              |
+| `CATEGORY_SELECTED`      | any product of a category (e.g. SD-WAN) is selected     |
+| `BANDWIDTH_AT_LEAST`     | the highest selected connectivity bandwidth is ≥ N Mbps |
+| `CONTRACT_TERM_AT_LEAST` | the term is ≥ N months                                  |
+| `ALWAYS`                 | unconditionally                                         |
 
-| Effect | Asserts |
-|---|---|
-| `REQUIRES_PRODUCT` | product X must also be selected |
-| `REQUIRES_ONE_OF` | at least one of products X, Y… must be selected |
-| `INCOMPATIBLE_WITH_PRODUCT` | product X must not be selected |
-| `RECOMMENDS_PRODUCT` | product X should be considered |
-| `AT_MOST_ONE_OF` | no more than one of X, Y… |
-| `MIN_CONTRACT_MONTHS` | the term must be at least N months |
-| `MIN_SERVICEABILITY` | the site's serviceability must be at least a level |
+| Effect                      | Asserts                                            |
+| --------------------------- | -------------------------------------------------- |
+| `REQUIRES_PRODUCT`          | product X must also be selected                    |
+| `REQUIRES_ONE_OF`           | at least one of products X, Y… must be selected    |
+| `INCOMPATIBLE_WITH_PRODUCT` | product X must not be selected                     |
+| `RECOMMENDS_PRODUCT`        | product X should be considered                     |
+| `AT_MOST_ONE_OF`            | no more than one of X, Y…                          |
+| `MIN_CONTRACT_MONTHS`       | the term must be at least N months                 |
+| `MIN_SERVICEABILITY`        | the site's serviceability must be at least a level |
 
 Triggers and effects are TypeScript discriminated unions, and the interpreter
 ends every `switch` with an exhaustiveness guard, so adding a kind to the enum
@@ -52,13 +52,13 @@ without handling it is a compile error.
 
 ### Severities
 
-| Severity | Blocks saving and submission? | Used for |
-|---|---|---|
-| `ERROR` | **Yes** | incompatible or incomplete configurations |
-| `REQUIRED` | No | information the rep must act on before the customer does |
-| `WARNING` | No | risky but permitted choices |
-| `RECOMMENDATION` | No | upsell and best-practice suggestions |
-| `INFORMATION` | No | context |
+| Severity         | Blocks saving and submission? | Used for                                                 |
+| ---------------- | ----------------------------- | -------------------------------------------------------- |
+| `ERROR`          | **Yes**                       | incompatible or incomplete configurations                |
+| `REQUIRED`       | No                            | information the rep must act on before the customer does |
+| `WARNING`        | No                            | risky but permitted choices                              |
+| `RECOMMENDATION` | No                            | upsell and best-practice suggestions                     |
+| `INFORMATION`    | No                            | context                                                  |
 
 Only `ERROR` blocks. Everything else is shown with its own styling and, where a
 fix is a single product, a one-click remedy ("Add Enterprise Router").
@@ -75,26 +75,26 @@ always apply:
 
 ### The seeded rule set
 
-| Rule | Severity |
-|---|---|
-| 10 Gbps requires an **AVAILABLE** site | error |
-| 10 Gbps requires the **Enterprise Router** | error |
-| 10 Gbps is incompatible with the **Managed Router** | error |
-| ≥ 1 Gbps requires **a** managed routing device (Managed or Enterprise Router) | error |
-| 10 Gbps requires a **36-month** minimum term | error |
-| SD-WAN requires the **SD-WAN Edge Device** | error |
-| SD-WAN is incompatible with the Managed Router | error |
-| SD-WAN Orchestration requires an SD-WAN service | error |
-| DDoS Protection requires the **Secure Internet Gateway** | error |
-| Zero Trust Network Access requires the Secure Internet Gateway | error |
-| A SIP Trunk requires business internet (wireless backup alone is not enough) | error |
-| A Technical Account Manager requires Premium or 24/7 support | error |
-| At most one support tier | error |
-| Legacy IDS alongside Managed Firewall | warning |
-| ≥ 1 Gbps: consider a 4G/5G wireless backup | recommendation |
-| Managed Detection & Response: consider Premium Support | recommendation |
-| SD-WAN: consider a Managed Firewall | recommendation |
-| (one deliberately inactive rule, to prove inactive rules never fire) | — |
+| Rule                                                                          | Severity       |
+| ----------------------------------------------------------------------------- | -------------- |
+| 10 Gbps requires an **AVAILABLE** site                                        | error          |
+| 10 Gbps requires the **Enterprise Router**                                    | error          |
+| 10 Gbps is incompatible with the **Managed Router**                           | error          |
+| ≥ 1 Gbps requires **a** managed routing device (Managed or Enterprise Router) | error          |
+| 10 Gbps requires a **36-month** minimum term                                  | error          |
+| SD-WAN requires the **SD-WAN Edge Device**                                    | error          |
+| SD-WAN is incompatible with the Managed Router                                | error          |
+| SD-WAN Orchestration requires an SD-WAN service                               | error          |
+| DDoS Protection requires the **Secure Internet Gateway**                      | error          |
+| Zero Trust Network Access requires the Secure Internet Gateway                | error          |
+| A SIP Trunk requires business internet (wireless backup alone is not enough)  | error          |
+| A Technical Account Manager requires Premium or 24/7 support                  | error          |
+| At most one support tier                                                      | error          |
+| Legacy IDS alongside Managed Firewall                                         | warning        |
+| ≥ 1 Gbps: consider a 4G/5G wireless backup                                    | recommendation |
+| Managed Detection & Response: consider Premium Support                        | recommendation |
+| SD-WAN: consider a Managed Firewall                                           | recommendation |
+| (one deliberately inactive rule, to prove inactive rules never fire)          | —              |
 
 **A specification conflict, resolved.** The brief stated "≥ 1 Gbps requires the
 Managed Router" and also "10 Gbps requires the Enterprise Router and is
@@ -128,9 +128,9 @@ TCV           = MRR × term months + OTC
 
 ### Term discounts
 
-| Term | 12 | 24 | 36 | 48 | 60 months |
-|---|---|---|---|---|---|
-| Discount | 0% | 2% | 5% | 6.5% | 8% |
+| Term     | 12  | 24  | 36  | 48   | 60 months |
+| -------- | --- | --- | --- | ---- | --------- |
+| Discount | 0%  | 2%  | 5%  | 6.5% | 8%        |
 
 ### Decisions worth knowing
 
@@ -152,12 +152,12 @@ TCV           = MRR × term months + OTC
 
 ## Discount authority and approvals
 
-| Role | May grant up to |
-|---|---|
-| Sales Representative | 10% |
-| Sales Manager | 20% |
-| Pricing Administrator | 35% |
-| Administrator | 35% |
+| Role                  | May grant up to |
+| --------------------- | --------------- |
+| Sales Representative  | 10%             |
+| Sales Manager         | 20%             |
+| Pricing Administrator | 35%             |
+| Administrator         | 35%             |
 
 Nothing above **35%** can be approved by anyone; the server clamps a larger
 request to 35% before pricing and storing it.
@@ -195,19 +195,19 @@ make it and whether the quote's owner is excluded
 exhaustive over `QuoteStatus`, so a new status does not compile until its
 transitions are declared.
 
-| From | To | Who |
-|---|---|---|
-| Draft | Configuring, Cancelled | anyone with edit rights |
-| Configuring | Ready for review, Draft, Cancelled | editor |
-| Ready for review | Approval required, Configuring, Cancelled | editor |
-| Ready for review | Approved | approver, **not the owner** |
-| Approval required | Approved, Rejected | approver, **not the owner** |
-| Approval required | Configuring (withdraw), Cancelled | editor |
-| Approved | Sent to customer, Configuring (reopen), Cancelled | editor |
-| Rejected | Configuring, Cancelled | editor |
-| Sent to customer | Accepted, Expired, Cancelled | editor |
-| Expired | Configuring (revive as a new version) | editor |
-| Accepted, Cancelled | — | terminal |
+| From                | To                                                | Who                         |
+| ------------------- | ------------------------------------------------- | --------------------------- |
+| Draft               | Configuring, Cancelled                            | anyone with edit rights     |
+| Configuring         | Ready for review, Draft, Cancelled                | editor                      |
+| Ready for review    | Approval required, Configuring, Cancelled         | editor                      |
+| Ready for review    | Approved                                          | approver, **not the owner** |
+| Approval required   | Approved, Rejected                                | approver, **not the owner** |
+| Approval required   | Configuring (withdraw), Cancelled                 | editor                      |
+| Approved            | Sent to customer, Configuring (reopen), Cancelled | editor                      |
+| Rejected            | Configuring, Cancelled                            | editor                      |
+| Sent to customer    | Accepted, Expired, Cancelled                      | editor                      |
+| Expired             | Configuring (revive as a new version)             | editor                      |
+| Accepted, Cancelled | —                                                 | terminal                    |
 
 Saving a configuration on a draft or rejected quote moves it to Configuring.
 "Send for approval" from Configuring passes through Ready for review in the same
@@ -220,3 +220,47 @@ and is otherwise never touched ([ADR-007](adr/ADR-007-append-only-versioning.md)
 "Restore" copies an old version into a **new** version on top of the history —
 it does not rewind — and returns the quote to Configuring so any approval must
 be obtained again for the figures it carries.
+
+---
+
+## Managing the catalogue and rules
+
+Products and rules are data, so a Pricing Administrator edits them in the app
+(`/products` and `/products/rules`) rather than through a migration. Both live
+in the CPQ zone, gated on `PRODUCT_MANAGE` and `RULE_MANAGE`; every action is
+re-authorized server-side.
+
+**Products.** Prices are entered in euro and stored as integer cents; the
+per-product discount ceiling is entered as a percentage and stored as basis
+points. Withdrawing a product asks for confirmation and then reports how many
+in-progress quotes still include it — those quotes keep their prices but show
+the product as withdrawn until a rep removes it. Editing a price changes what
+the _next_ quote version costs and never what an existing version says, because
+versions snapshot their own prices, SKUs and names
+([ADR-007](adr/ADR-007-append-only-versioning.md)).
+
+**Rules.** The editor is the rule model: choose a trigger, choose an effect,
+fill in only the parameters that pair needs, and read the rule back as the
+sentence a salesperson would see — "When connectivity of 10 Gbps or more is
+selected, require Enterprise Router." Rules can be enabled and disabled from the
+list without opening the editor, and a disabled rule never fires.
+
+Two things the editor cannot express, on purpose:
+
+- **`type` is derived from the effect** (`ruleTypeForEffect`), so a rule whose
+  declared type contradicts its effect cannot exist.
+- **A rule cannot make a product require, recommend or forbid itself**, and a
+  "one of" group needs at least two distinct members — a group of one is not a
+  choice. Product references are checked against the database before the rule is
+  stored.
+
+Rule and catalogue changes take effect on the next configuration: the
+configurator loads the active rule set per request, and the server re-evaluates
+it on every save. Quotes that were already priced keep their stored figures;
+their configuration is re-checked only when a document is generated, and then
+only blocks quotes that are still being edited
+([ADR-012](adr/ADR-012-on-demand-documents-with-sse.md)).
+
+Discount authority limits, the contract-value threshold and the term-discount
+ladder are **not** editable here — they are policy in `cpq-engine/policy.ts`,
+changed by a deployment rather than by a form.

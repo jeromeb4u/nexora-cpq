@@ -139,7 +139,12 @@ export function QuoteTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <SortHeader column="quoteNumber" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+              <SortHeader
+                column="quoteNumber"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              >
                 Quote
               </SortHeader>
               <TableHead>Customer</TableHead>
@@ -158,7 +163,12 @@ export function QuoteTable({
               <SortHeader column="status" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
                 Status
               </SortHeader>
-              <SortHeader column="updatedAt" sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort}>
+              <SortHeader
+                column="updatedAt"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              >
                 Updated
               </SortHeader>
             </TableRow>
@@ -174,7 +184,7 @@ export function QuoteTable({
                     {row.quoteNumber}
                   </Link>
                   {row.title ? (
-                    <span className="block max-w-56 truncate text-2xs text-[var(--text-tertiary)]">
+                    <span className="text-2xs block max-w-56 truncate text-[var(--text-tertiary)]">
                       {row.title}
                     </span>
                   ) : null}

@@ -1,11 +1,4 @@
-export {
-  logger,
-  redact,
-  LogLevel,
-  type Logger,
-  type LogContext,
-  type LogValue,
-} from './logger';
+export { logger, redact, LogLevel, type Logger, type LogContext, type LogValue } from './logger';
 
 export {
   AppError,

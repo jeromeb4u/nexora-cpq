@@ -120,7 +120,9 @@ describe('provider selection', () => {
   });
 
   it('refuses the filesystem provider on Vercel', () => {
-    expect(resolveEmailProvider({ EMAIL_PROVIDER: 'filesystem', VERCEL: '1' }).name).toBe('console');
+    expect(resolveEmailProvider({ EMAIL_PROVIDER: 'filesystem', VERCEL: '1' }).name).toBe(
+      'console',
+    );
   });
 });
 

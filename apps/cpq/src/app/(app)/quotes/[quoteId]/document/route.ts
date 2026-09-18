@@ -40,7 +40,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ quot
       if (parsedVersion && !parsedVersion.success) {
         return NextResponse.json({ error: 'Quote document could not be found.' }, { status: 404 });
       }
-      access = { kind: 'actor', actor, ...(parsedVersion ? { versionId: parsedVersion.data } : {}) };
+      access = {
+        kind: 'actor',
+        actor,
+        ...(parsedVersion ? { versionId: parsedVersion.data } : {}),
+      };
     }
 
     const document = await generateQuoteDocument(access, quoteId);
@@ -56,7 +60,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ quot
     });
   } catch (error) {
     const safe = toSafeError(error);
-    logger.warn('quote document request failed', { quoteId, code: safe.code, reference: safe.reference });
+    logger.warn('quote document request failed', {
+      quoteId,
+      code: safe.code,
+      reference: safe.reference,
+    });
     return NextResponse.json(
       { error: safe.message, reference: safe.reference },
       { status: ERROR_STATUS[safe.code] },

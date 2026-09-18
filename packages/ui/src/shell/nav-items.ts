@@ -1,11 +1,4 @@
-import {
-  Activity,
-  Boxes,
-  Building2,
-  CheckSquare,
-  FileText,
-  LayoutDashboard,
-} from 'lucide-react';
+import { Activity, Boxes, Building2, CheckSquare, FileText, LayoutDashboard } from 'lucide-react';
 
 import type { NavItem } from './types';
 
@@ -86,9 +79,7 @@ export function buildNavItems({
     href: definition.href,
     icon: definition.icon,
     crossZone: ZONE_OF_ROUTE[definition.href] !== zone,
-    ...(definition.requiresPermission
-      ? { requiresPermission: definition.requiresPermission }
-      : {}),
+    ...(definition.requiresPermission ? { requiresPermission: definition.requiresPermission } : {}),
     ...(definition.href === '/approvals' && pendingApprovals > 0
       ? { badge: pendingApprovals }
       : {}),

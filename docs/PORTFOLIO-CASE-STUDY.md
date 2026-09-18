@@ -1,7 +1,7 @@
 # Case study — Nexora CPQ
 
-*A portfolio project. Nexora Telecom is fictional; no part of this system was
-built for, or deployed at, any real company.*
+_A portfolio project. Nexora Telecom is fictional; no part of this system was
+built for, or deployed at, any real company._
 
 ---
 
@@ -36,6 +36,9 @@ where the design is visible in the code rather than asserted in a README.
   notifications that can actually be read and cleared.
 - **Customer and site management**, including serviceability, which is what the
   configurator's rules are evaluated against.
+- **Catalogue and rule administration** for pricing administrators: products,
+  prices and discount ceilings, and a rule editor that previews each rule as the
+  sentence a sales rep will read.
 - **Two independently deployed micro frontends** that behave as one product.
 - A **test suite in three layers**, CI, and documentation of the decisions.
 
@@ -65,7 +68,7 @@ is what allows it to run in both places. Full detail: [ARCHITECTURE.md](ARCHITEC
 ## Decisions that shaped it
 
 **The browser cannot send money.** The configurator previews prices instantly,
-but a save carries only product ids, quantities, a term and a *requested*
+but a save carries only product ids, quantities, a term and a _requested_
 discount. The server reloads the catalogue, re-evaluates the rules, clamps the
 discount to policy and prices from database rows. A test posts fabricated totals
 and asserts they are ignored. ([ADR-004](adr/ADR-004-server-authoritative-pricing.md))
@@ -76,7 +79,7 @@ deliberately closed and exhaustively type-checked, trading unlimited flexibility
 for rules that can be reasoned about and tested. ([ADR-005](adr/ADR-005-rules-as-data.md))
 
 **Authorization lives in queries.** Which quotes a user may see is compiled into
-the `WHERE` clause, and a quote they may not see is reported as *not found*, so
+the `WHERE` clause, and a quote they may not see is reported as _not found_, so
 guessing ids reveals nothing. ([SECURITY.md](SECURITY.md))
 
 **History is never rewritten.** Every save is a new version; approvals and
@@ -115,7 +118,7 @@ verification layers, not the features themselves.
 
 4. **A specification that could not be satisfied.** Two requirements, read
    literally, made every 10 Gbps configuration invalid. Resolving it meant
-   deciding what the rule was *for* and recording the interpretation.
+   deciding what the rule was _for_ and recording the interpretation.
 
 5. **Authentication across an origin boundary.** The auth client initially
    pointed at the Platform app's own URL, which broke with CORS errors the
@@ -147,8 +150,10 @@ See [TESTING.md](TESTING.md).
 - Documents are re-rendered on every open instead of cached.
 - No MFA, password reset or Content-Security-Policy — out of scope for a demo
   with public, fictional accounts.
-- Product, rule and threshold management is modelled in the permissions and data
-  but has no administration UI yet; the catalogue is read-only in the app.
+- Discount authority limits and the contract-value threshold are policy in code
+  (`cpq-engine/policy.ts`), not editable rows. Products and rules _are_ editable
+  in the app; the thresholds that govern approval deliberately are not, because
+  changing them is a change to the commercial model, not to data.
 - Navigation between zones is a full page load, the accepted cost of keeping
   each zone an ordinary server-rendered application.
 

@@ -145,8 +145,7 @@ export function evaluateDiscount(request: DiscountRequest): DiscountEvaluation {
   const requiresApproval =
     (!withinAuthority && !exceedsAllRoles) || (withinAuthority && tcvTriggered);
 
-  const someLinesCapped =
-    request.selectedProducts.length > 0 && requestedBps > tightestBps;
+  const someLinesCapped = request.selectedProducts.length > 0 && requestedBps > tightestBps;
 
   const reasons: ApprovalReason[] = [];
   if (!withinAuthority && !exceedsAllRoles) {

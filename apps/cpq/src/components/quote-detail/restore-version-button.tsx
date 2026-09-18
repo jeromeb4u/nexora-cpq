@@ -20,7 +20,11 @@ export interface RestoreVersionButtonProps {
  * nothing is rolled back: the source row is copied and every later version
  * stays exactly as it was.
  */
-export function RestoreVersionButton({ quoteId, versionId, versionNumber }: RestoreVersionButtonProps) {
+export function RestoreVersionButton({
+  quoteId,
+  versionId,
+  versionNumber,
+}: RestoreVersionButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

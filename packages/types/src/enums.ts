@@ -121,6 +121,39 @@ export type RuleType = (typeof RuleType)[keyof typeof RuleType];
 export const RULE_TYPES = Object.values(RuleType);
 
 /**
+ * When a rule fires. These mirror the `RuleTrigger` union in `domain.ts` and
+ * the Prisma enum of the same name — the seed-data drift test fails if they
+ * stop agreeing.
+ */
+export const RuleTriggerKind = {
+  /** A specific product is in the configuration. */
+  PRODUCT_SELECTED: 'PRODUCT_SELECTED',
+  /** Any product of a category is selected. */
+  CATEGORY_SELECTED: 'CATEGORY_SELECTED',
+  /** The highest selected connectivity bandwidth reaches a threshold. */
+  BANDWIDTH_AT_LEAST: 'BANDWIDTH_AT_LEAST',
+  /** The contract term reaches a threshold. */
+  CONTRACT_TERM_AT_LEAST: 'CONTRACT_TERM_AT_LEAST',
+  /** Unconditionally. */
+  ALWAYS: 'ALWAYS',
+} as const;
+export type RuleTriggerKind = (typeof RuleTriggerKind)[keyof typeof RuleTriggerKind];
+export const RULE_TRIGGER_KINDS = Object.values(RuleTriggerKind);
+
+/** What a fired rule asserts. Mirrors the `RuleEffect` union and the Prisma enum. */
+export const RuleEffectKind = {
+  REQUIRES_PRODUCT: 'REQUIRES_PRODUCT',
+  REQUIRES_ONE_OF: 'REQUIRES_ONE_OF',
+  INCOMPATIBLE_WITH_PRODUCT: 'INCOMPATIBLE_WITH_PRODUCT',
+  RECOMMENDS_PRODUCT: 'RECOMMENDS_PRODUCT',
+  AT_MOST_ONE_OF: 'AT_MOST_ONE_OF',
+  MIN_CONTRACT_MONTHS: 'MIN_CONTRACT_MONTHS',
+  MIN_SERVICEABILITY: 'MIN_SERVICEABILITY',
+} as const;
+export type RuleEffectKind = (typeof RuleEffectKind)[keyof typeof RuleEffectKind];
+export const RULE_EFFECT_KINDS = Object.values(RuleEffectKind);
+
+/**
  * Severity of a configuration finding. Only ERROR blocks progression;
  * everything else is advisory. The UI renders each level distinctly (§14).
  */
@@ -200,6 +233,8 @@ export const AuditAction = {
   QUOTE_DOCUMENT_GENERATED: 'QUOTE_DOCUMENT_GENERATED',
   PRODUCT_CREATED: 'PRODUCT_CREATED',
   PRODUCT_UPDATED: 'PRODUCT_UPDATED',
+  RULE_CREATED: 'RULE_CREATED',
+  RULE_UPDATED: 'RULE_UPDATED',
   PROFILE_UPDATED: 'PROFILE_UPDATED',
   AUTH_SIGNED_IN: 'AUTH_SIGNED_IN',
   AUTH_SIGN_IN_FAILED: 'AUTH_SIGN_IN_FAILED',
@@ -217,6 +252,7 @@ export const AuditEntity = {
   QUOTE_ITEM: 'QUOTE_ITEM',
   QUOTE_APPROVAL: 'QUOTE_APPROVAL',
   PRODUCT: 'PRODUCT',
+  PRODUCT_RULE: 'PRODUCT_RULE',
   USER: 'USER',
 } as const;
 export type AuditEntity = (typeof AuditEntity)[keyof typeof AuditEntity];

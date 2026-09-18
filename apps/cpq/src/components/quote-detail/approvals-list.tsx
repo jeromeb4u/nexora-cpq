@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react';
 import { Badge, Card, CardContent, CardHeader, CardTitle, EmptyState } from '@nexora/ui';
-import { type ApprovalDecision, type ApprovalReason, bpsToRate, cents, formatMoney, formatRate } from '@nexora/types';
+import {
+  type ApprovalDecision,
+  type ApprovalReason,
+  bpsToRate,
+  cents,
+  formatMoney,
+  formatRate,
+} from '@nexora/types';
 import { cn } from '../cn';
 import { RelativeTime } from '../relative-time';
 
@@ -93,7 +100,8 @@ export function ApprovalsList({ approvals, now }: ApprovalsListProps) {
                   </span>
                 </div>
                 <span className="text-2xs text-[var(--text-tertiary)]">
-                  Requested <RelativeTime date={approval.createdAt} now={now} /> by {approval.requestedBy.name}
+                  Requested <RelativeTime date={approval.createdAt} now={now} /> by{' '}
+                  {approval.requestedBy.name}
                 </span>
               </div>
 
@@ -101,14 +109,22 @@ export function ApprovalsList({ approvals, now }: ApprovalsListProps) {
                 <Field label="Requested discount">
                   {formatRate(bpsToRate(approval.requestedDiscountBps))}
                 </Field>
-                <Field label="Allowed discount">{formatRate(bpsToRate(approval.allowedDiscountBps))}</Field>
-                <Field label="MRR at request">{formatMoney(cents(approval.mrrCentsSnapshot))}</Field>
+                <Field label="Allowed discount">
+                  {formatRate(bpsToRate(approval.allowedDiscountBps))}
+                </Field>
+                <Field label="MRR at request">
+                  {formatMoney(cents(approval.mrrCentsSnapshot))}
+                </Field>
                 <Field label="Requested by">{approval.requestedBy.name}</Field>
               </div>
 
               <div className="mt-3">
-                <p className="text-2xs uppercase tracking-wide text-[var(--text-tertiary)]">Justification</p>
-                <p className="mt-0.5 text-sm text-[var(--text-primary)]">{approval.justification}</p>
+                <p className="text-2xs uppercase tracking-wide text-[var(--text-tertiary)]">
+                  Justification
+                </p>
+                <p className="mt-0.5 text-sm text-[var(--text-primary)]">
+                  {approval.justification}
+                </p>
               </div>
 
               {approval.decision !== 'PENDING' ? (
@@ -116,7 +132,11 @@ export function ApprovalsList({ approvals, now }: ApprovalsListProps) {
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <Field label="Decided by">{approval.decidedBy?.name ?? '—'}</Field>
                     <Field label="Decided">
-                      {approval.decidedAt ? <RelativeTime date={approval.decidedAt} now={now} /> : '—'}
+                      {approval.decidedAt ? (
+                        <RelativeTime date={approval.decidedAt} now={now} />
+                      ) : (
+                        '—'
+                      )}
                     </Field>
                   </div>
                   {approval.decisionNote ? (
@@ -124,7 +144,9 @@ export function ApprovalsList({ approvals, now }: ApprovalsListProps) {
                       <p className="text-2xs uppercase tracking-wide text-[var(--text-tertiary)]">
                         Decision note
                       </p>
-                      <p className="mt-0.5 text-sm text-[var(--text-primary)]">{approval.decisionNote}</p>
+                      <p className="mt-0.5 text-sm text-[var(--text-primary)]">
+                        {approval.decisionNote}
+                      </p>
                     </div>
                   ) : null}
                 </div>

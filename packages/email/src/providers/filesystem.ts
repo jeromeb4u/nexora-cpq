@@ -11,7 +11,9 @@ import type { EmailProvider } from '../types';
  * Not for production: serverless filesystems are read-only or ephemeral, which
  * is why `resolveEmailProvider` refuses this provider when running on Vercel.
  */
-export function createFilesystemProvider(directory = resolve(process.cwd(), '.mail')): EmailProvider {
+export function createFilesystemProvider(
+  directory = resolve(process.cwd(), '.mail'),
+): EmailProvider {
   return {
     name: 'filesystem',
     async send(message) {

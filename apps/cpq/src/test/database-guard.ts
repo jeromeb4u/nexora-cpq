@@ -20,7 +20,9 @@ export function assertDisposableDatabase(url: string | undefined): string {
   }
 
   if (host === 'neon.tech' || host.endsWith('.neon.tech')) {
-    throw new Error('Refusing to run mutating tests against a Neon database. Use a local or CI database.');
+    throw new Error(
+      'Refusing to run mutating tests against a Neon database. Use a local or CI database.',
+    );
   }
 
   return url;

@@ -207,10 +207,9 @@ describe('discount engine', () => {
 
   describe('approved rate', () => {
     it('applies a within-authority rate as requested', () => {
-      expect(approvedDiscountRate(request({ requestedBps: 800, role: Role.SALES_REP }))).toBeCloseTo(
-        0.08,
-        5,
-      );
+      expect(
+        approvedDiscountRate(request({ requestedBps: 800, role: Role.SALES_REP })),
+      ).toBeCloseTo(0.08, 5);
     });
 
     it('shows the approver the full requested rate while escalation is pending', () => {

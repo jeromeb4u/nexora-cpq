@@ -4,15 +4,15 @@ Nexora CPQ is two Next.js applications — **Platform** and **CPQ** — served f
 one origin, sharing a set of workspace packages and one PostgreSQL database.
 This document is the map; the detail lives in the linked documents.
 
-| Topic | Document |
-|---|---|
-| How the two zones become one product | [MFE.md](MFE.md) |
-| Data model, migrations, seed | [DATABASE.md](DATABASE.md) |
-| Rules, pricing, discounts, the state machine | [CPQ-RULES.md](CPQ-RULES.md) |
-| Authentication, authorization, threat model | [SECURITY.md](SECURITY.md) |
-| Test strategy and how to run each layer | [TESTING.md](TESTING.md) |
-| Vercel, environment variables, free-tier limits | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| Why things are the way they are | [DECISIONS.md](DECISIONS.md) and [adr/](adr/) |
+| Topic                                           | Document                                      |
+| ----------------------------------------------- | --------------------------------------------- |
+| How the two zones become one product            | [MFE.md](MFE.md)                              |
+| Data model, migrations, seed                    | [DATABASE.md](DATABASE.md)                    |
+| Rules, pricing, discounts, the state machine    | [CPQ-RULES.md](CPQ-RULES.md)                  |
+| Authentication, authorization, threat model     | [SECURITY.md](SECURITY.md)                    |
+| Test strategy and how to run each layer         | [TESTING.md](TESTING.md)                      |
+| Vercel, environment variables, free-tier limits | [DEPLOYMENT.md](DEPLOYMENT.md)                |
+| Why things are the way they are                 | [DECISIONS.md](DECISIONS.md) and [adr/](adr/) |
 
 ---
 
@@ -76,7 +76,7 @@ flowchart TD
 The dependency rules that keep this healthy:
 
 - **`@nexora/cpq-engine` imports nothing but `@nexora/types`.** No database, no
-  React, no I/O. That is what lets the configurator run the *same* rule and
+  React, no I/O. That is what lets the configurator run the _same_ rule and
   pricing code in the browser as a live preview while the server runs it again
   as the authority ([ADR-008](adr/ADR-008-isomorphic-engine.md)).
 - **Apps never import each other.** Platform and CPQ share code only through
@@ -180,11 +180,11 @@ sent, so a later revision never changes what their link shows.
 
 ## Cross-cutting concerns
 
-| Concern | Where | Notes |
-|---|---|---|
-| Errors | `@nexora/observability` `AppError`, `toSafeError` | Users see a sentence and a `REQ-XXXXX` reference; logs carry the detail. |
-| Logging | `@nexora/observability` `logger` | JSON lines; credential-shaped keys are redacted. |
-| Audit | `apps/cpq/src/lib/audit.ts` | Written inside the same transaction as the change it describes. |
-| Email | `@nexora/email` | Sent after commit; at-most-once by design ([ADR-010](adr/ADR-010-email-after-commit.md)). |
-| Theming | `@nexora/ui` `THEME_INIT_SCRIPT` | Applied before first paint; shared across zones because they share an origin. |
-| Time | `src/lib/now.ts` in each app | One instant per request, passed to components, so server and client render identical relative times. |
+| Concern | Where                                             | Notes                                                                                                |
+| ------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Errors  | `@nexora/observability` `AppError`, `toSafeError` | Users see a sentence and a `REQ-XXXXX` reference; logs carry the detail.                             |
+| Logging | `@nexora/observability` `logger`                  | JSON lines; credential-shaped keys are redacted.                                                     |
+| Audit   | `apps/cpq/src/lib/audit.ts`                       | Written inside the same transaction as the change it describes.                                      |
+| Email   | `@nexora/email`                                   | Sent after commit; at-most-once by design ([ADR-010](adr/ADR-010-email-after-commit.md)).            |
+| Theming | `@nexora/ui` `THEME_INIT_SCRIPT`                  | Applied before first paint; shared across zones because they share an origin.                        |
+| Time    | `src/lib/now.ts` in each app                      | One instant per request, passed to components, so server and client render identical relative times. |

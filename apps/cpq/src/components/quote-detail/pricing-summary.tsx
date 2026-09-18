@@ -15,15 +15,7 @@ export interface PricingSummaryProps {
   readonly version: PricingSummaryVersion | null;
 }
 
-function Row({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-}) {
+function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 py-1.5">
       <span className="text-xs text-[var(--text-tertiary)]">{label}</span>

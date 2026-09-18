@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  APPROVAL_DECISIONS,
   APPROVAL_REASONS,
   AUDIT_ACTIONS,
   AUDIT_ENTITIES,
@@ -11,6 +12,8 @@ import {
   PRODUCT_CATEGORIES,
   QUOTE_STATUSES,
   ROLES,
+  RULE_EFFECT_KINDS,
+  RULE_TRIGGER_KINDS,
   RULE_TYPES,
   SERVICEABILITIES,
   VALIDATION_SEVERITIES,
@@ -296,9 +299,12 @@ describe('Prisma enums mirror the canonical domain enums', () => {
     ['ProductCategory', PRODUCT_CATEGORIES, PrismaEnums.ProductCategory],
     ['PricingModel', PRICING_MODELS, PrismaEnums.PricingModel],
     ['RuleType', RULE_TYPES, PrismaEnums.RuleType],
+    ['RuleTriggerKind', RULE_TRIGGER_KINDS, PrismaEnums.RuleTriggerKind],
+    ['RuleEffectKind', RULE_EFFECT_KINDS, PrismaEnums.RuleEffectKind],
     ['ValidationSeverity', VALIDATION_SEVERITIES, PrismaEnums.ValidationSeverity],
     ['QuoteStatus', QUOTE_STATUSES, PrismaEnums.QuoteStatus],
     ['ApprovalReason', APPROVAL_REASONS, PrismaEnums.ApprovalReason],
+    ['ApprovalDecision', APPROVAL_DECISIONS, PrismaEnums.ApprovalDecision],
     ['AuditAction', AUDIT_ACTIONS, PrismaEnums.AuditAction],
     ['AuditEntity', AUDIT_ENTITIES, PrismaEnums.AuditEntity],
     ['NotificationType', NOTIFICATION_TYPES, PrismaEnums.NotificationType],

@@ -31,19 +31,19 @@ erDiagram
   user ||--o{ notification : receives
 ```
 
-| Table | Purpose |
-|---|---|
-| `user`, `session`, `account`, `verification` | Better Auth's tables, extended with `role`, `jobTitle`, `managerId` (team hierarchy) and `isActive`. |
-| `customer` | A company. `vatNumber` is unique; `accountOwnerId` is the responsible salesperson. |
-| `customer_location` | An installation site: address, site contact, **serviceability** and the maximum bandwidth deliverable there. |
-| `product` | The catalogue. Prices in cents, `pricingModel` (per unit / flat / per site), `minContractMonths`, `maxDiscountBps`, `bandwidthMbps` for connectivity. |
-| `product_rule`, `product_rule_target` | Compatibility rules as data: a trigger and an effect ([CPQ-RULES.md](CPQ-RULES.md)). The target table holds the product lists of `REQUIRES_ONE_OF` / `AT_MOST_ONE_OF` effects. |
-| `quote` | The commercial container: number, status, owner, customer, site, validity, and a pointer to its **current** version. |
-| `quote_version` | One priced configuration. Every money column is server-computed. Superseded, never updated or deleted. |
-| `quote_item` | A priced line on a version, with SKU and name **snapshots** so a renamed product never rewrites an old quote. |
-| `quote_approval` | A request for sign-off, bound to the exact version it concerns, with the requested and allowed discount snapshotted. |
-| `audit_event` | Who did what to which entity, with a human-readable summary. |
-| `notification` | In-app notifications (approval requested / decided, quote accepted). |
+| Table                                        | Purpose                                                                                                                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `user`, `session`, `account`, `verification` | Better Auth's tables, extended with `role`, `jobTitle`, `managerId` (team hierarchy) and `isActive`.                                                                           |
+| `customer`                                   | A company. `vatNumber` is unique; `accountOwnerId` is the responsible salesperson.                                                                                             |
+| `customer_location`                          | An installation site: address, site contact, **serviceability** and the maximum bandwidth deliverable there.                                                                   |
+| `product`                                    | The catalogue. Prices in cents, `pricingModel` (per unit / flat / per site), `minContractMonths`, `maxDiscountBps`, `bandwidthMbps` for connectivity.                          |
+| `product_rule`, `product_rule_target`        | Compatibility rules as data: a trigger and an effect ([CPQ-RULES.md](CPQ-RULES.md)). The target table holds the product lists of `REQUIRES_ONE_OF` / `AT_MOST_ONE_OF` effects. |
+| `quote`                                      | The commercial container: number, status, owner, customer, site, validity, and a pointer to its **current** version.                                                           |
+| `quote_version`                              | One priced configuration. Every money column is server-computed. Superseded, never updated or deleted.                                                                         |
+| `quote_item`                                 | A priced line on a version, with SKU and name **snapshots** so a renamed product never rewrites an old quote.                                                                  |
+| `quote_approval`                             | A request for sign-off, bound to the exact version it concerns, with the requested and allowed discount snapshotted.                                                           |
+| `audit_event`                                | Who did what to which entity, with a human-readable summary.                                                                                                                   |
+| `notification`                               | In-app notifications (approval requested / decided, quote accepted).                                                                                                           |
 
 ### Enums instead of lookup tables
 
@@ -91,16 +91,16 @@ the stored figures are internally consistent before rendering them.
 
 Every index corresponds to a query the application runs:
 
-| Index | Serves |
-|---|---|
-| `quote (ownerId, status)` | "my quotes in this status" — the rep's list and dashboard |
-| `quote (status, updatedAt)` / `quote (updatedAt)` | status-filtered and default-sorted quote lists |
-| `customer (companyName)` | the customer list's default ordering |
-| `quote_approval (decision, createdAt)` | the approval queue, oldest first |
-| `audit_event (entity, entityId, createdAt)` | an entity's history |
-| `audit_event (actorId, createdAt)` | a user's activity feed |
-| `notification (userId, readAt, createdAt)` | unread notifications badge |
-| `product_rule (isActive, priority)` | loading the active rule set in evaluation order |
+| Index                                             | Serves                                                    |
+| ------------------------------------------------- | --------------------------------------------------------- |
+| `quote (ownerId, status)`                         | "my quotes in this status" — the rep's list and dashboard |
+| `quote (status, updatedAt)` / `quote (updatedAt)` | status-filtered and default-sorted quote lists            |
+| `customer (companyName)`                          | the customer list's default ordering                      |
+| `quote_approval (decision, createdAt)`            | the approval queue, oldest first                          |
+| `audit_event (entity, entityId, createdAt)`       | an entity's history                                       |
+| `audit_event (actorId, createdAt)`                | a user's activity feed                                    |
+| `notification (userId, readAt, createdAt)`        | unread notifications badge                                |
+| `product_rule (isActive, priority)`               | loading the active rule set in evaluation order           |
 
 ---
 
@@ -115,9 +115,9 @@ Every index corresponds to a query the application runs:
 
 Two URLs are configured, and they are genuinely different on Neon:
 
-| Variable | Used by | Neon endpoint |
-|---|---|---|
-| `DATABASE_URL` | the running apps | pooled (`-pooler` host) |
+| Variable              | Used by                                 | Neon endpoint                                                                    |
+| --------------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`        | the running apps                        | pooled (`-pooler` host)                                                          |
 | `DIRECT_DATABASE_URL` | Prisma Migrate (via `prisma.config.ts`) | direct — migrations need session-level advisory locks a transaction pooler drops |
 
 The client is cached on `globalThis` in development so hot reload does not open

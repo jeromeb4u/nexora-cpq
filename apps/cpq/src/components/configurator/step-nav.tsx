@@ -46,7 +46,7 @@ export function StepNav({ current, onNavigate, hasSelections, isValid }: StepNav
               >
                 <span
                   className={cn(
-                    'tabular flex size-5 shrink-0 items-center justify-center rounded-full border text-2xs font-semibold',
+                    'tabular text-2xs flex size-5 shrink-0 items-center justify-center rounded-full border font-semibold',
                     active
                       ? 'border-[var(--accent-solid)] bg-[var(--accent-solid)] text-[var(--text-inverse)]'
                       : behind
@@ -66,7 +66,7 @@ export function StepNav({ current, onNavigate, hasSelections, isValid }: StepNav
 
       <p
         className={cn(
-          'mt-3 rounded-md border px-2.5 py-2 text-2xs leading-relaxed',
+          'text-2xs mt-3 rounded-md border px-2.5 py-2 leading-relaxed',
           !hasSelections
             ? 'border-[var(--border-subtle)] bg-[var(--surface-sunken)] text-[var(--text-tertiary)]'
             : isValid

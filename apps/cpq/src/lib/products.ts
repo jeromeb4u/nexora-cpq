@@ -82,7 +82,10 @@ async function findProducts(where: Prisma.ProductWhereInput, query: ProductListQ
 export async function listProducts(query: ProductListQueryInput): Promise<ProductListResult> {
   const where = buildWhere(query);
 
-  const [rows, total] = await Promise.all([findProducts(where, query), prisma.product.count({ where })]);
+  const [rows, total] = await Promise.all([
+    findProducts(where, query),
+    prisma.product.count({ where }),
+  ]);
 
   return {
     rows,

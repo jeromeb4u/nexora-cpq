@@ -16,7 +16,9 @@ import {
  * here means a real behavioural change, not a fixture artefact.
  */
 
-function product(overrides: Partial<ProductSnapshot> & Pick<ProductSnapshot, 'id' | 'sku' | 'name' | 'category'>): ProductSnapshot {
+function product(
+  overrides: Partial<ProductSnapshot> & Pick<ProductSnapshot, 'id' | 'sku' | 'name' | 'category'>,
+): ProductSnapshot {
   return {
     monthlyPrice: cents(0),
     setupPrice: cents(0),

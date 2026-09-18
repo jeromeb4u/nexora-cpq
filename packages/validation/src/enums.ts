@@ -25,6 +25,7 @@ import {
   QUOTE_STATUSES,
   ROLES,
   SERVICEABILITIES,
+  VALIDATION_SEVERITIES,
 } from '@nexora/types';
 
 export const roleSchema = z.enum(ROLES, {
@@ -56,6 +57,11 @@ export const pricingModelSchema = z.enum(PRICING_MODELS, {
   error: 'Select a pricing model.',
 });
 export type PricingModelInput = z.infer<typeof pricingModelSchema>;
+
+export const validationSeveritySchema = z.enum(VALIDATION_SEVERITIES, {
+  error: 'Select a severity.',
+});
+export type ValidationSeverityInput = z.infer<typeof validationSeveritySchema>;
 
 export const quoteStatusSchema = z.enum(QUOTE_STATUSES, {
   error: 'Select a valid quote status.',

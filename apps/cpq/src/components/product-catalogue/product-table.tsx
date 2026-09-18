@@ -12,9 +12,17 @@ import {
   TableHeader,
   TableRow,
 } from '@nexora/ui';
-import { type PricingModel, type ProductCategory, bpsToRate, cents, formatMoney, formatRate } from '@nexora/types';
+import {
+  type PricingModel,
+  type ProductCategory,
+  bpsToRate,
+  cents,
+  formatMoney,
+  formatRate,
+} from '@nexora/types';
 
 import { CATEGORY_LABELS, formatBandwidth, PRICING_MODEL_LABELS } from './labels';
+import { ProductRowActions } from './product-row-actions';
 
 export interface ProductRow {
   readonly id: string;
@@ -36,6 +44,8 @@ export interface ProductRow {
 
 export interface ProductTableProps {
   readonly rows: readonly ProductRow[];
+  /** Whether the viewer may edit the catalogue; the server re-checks anyway. */
+  readonly canManage: boolean;
   readonly page: number;
   readonly pageCount: number;
   readonly total: number;
@@ -47,7 +57,14 @@ export interface ProductTableProps {
  * carries no `sortBy`, so the list is always presented in the curated
  * category / sortOrder / name order queried by `listProducts`.
  */
-export function ProductTable({ rows, page, pageCount, total, pageSize }: ProductTableProps) {
+export function ProductTable({
+  rows,
+  canManage,
+  page,
+  pageCount,
+  total,
+  pageSize,
+}: ProductTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -77,6 +94,11 @@ export function ProductTable({ rows, page, pageCount, total, pageSize }: Product
               <TableHead className="text-right">Max discount</TableHead>
               <TableHead className="text-right">Rules</TableHead>
               <TableHead>Status</TableHead>
+              {canManage ? (
+                <TableHead className="text-right">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,7 +111,7 @@ export function ProductTable({ rows, page, pageCount, total, pageSize }: Product
                   <TableCell className="max-w-64">
                     <span className="block truncate">{row.name}</span>
                     {row.bandwidthMbps !== null ? (
-                      <span className="block text-2xs text-[var(--text-tertiary)]">
+                      <span className="text-2xs block text-[var(--text-tertiary)]">
                         {formatBandwidth(row.bandwidthMbps)}
                       </span>
                     ) : null}
@@ -114,6 +136,11 @@ export function ProductTable({ rows, page, pageCount, total, pageSize }: Product
                       {row.isActive ? 'Active' : 'Withdrawn'}
                     </Badge>
                   </TableCell>
+                  {canManage ? (
+                    <TableCell className="whitespace-nowrap text-right">
+                      <ProductRowActions productId={row.id} sku={row.sku} isActive={row.isActive} />
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               );
             })}

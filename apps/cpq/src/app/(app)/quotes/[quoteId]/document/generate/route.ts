@@ -37,7 +37,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ quo
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: string, data: unknown) => controller.enqueue(encodeServerSentEvent(event, data));
+      const send = (event: string, data: unknown) =>
+        controller.enqueue(encodeServerSentEvent(event, data));
       let current: DocumentStepId | null = null;
 
       try {

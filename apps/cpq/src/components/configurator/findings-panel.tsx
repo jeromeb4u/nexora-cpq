@@ -60,7 +60,8 @@ const SEVERITY_STYLE: Record<
   },
   [ValidationSeverity.INFORMATION]: {
     icon: Info,
-    className: 'border-[var(--border-subtle)] bg-[var(--surface-sunken)] text-[var(--text-secondary)]',
+    className:
+      'border-[var(--border-subtle)] bg-[var(--surface-sunken)] text-[var(--text-secondary)]',
     label: 'Information',
   },
 };

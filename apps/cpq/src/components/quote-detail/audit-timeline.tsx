@@ -22,7 +22,10 @@ export function AuditTimeline({ events, now }: AuditTimelineProps) {
         <CardHeader>
           <CardTitle>Activity</CardTitle>
         </CardHeader>
-        <EmptyState title="No activity recorded" description="Nothing has been logged for this quote yet." />
+        <EmptyState
+          title="No activity recorded"
+          description="Nothing has been logged for this quote yet."
+        />
       </Card>
     );
   }

@@ -3,7 +3,11 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createDocumentToken, verifyDocumentToken } from './document-link';
 
 const NOW = 1_800_000_000;
-const claims = { quoteId: 'cquote0000000000000000001', versionId: 'cversion00000000000000001', exp: NOW + 3600 };
+const claims = {
+  quoteId: 'cquote0000000000000000001',
+  versionId: 'cversion00000000000000001',
+  exp: NOW + 3600,
+};
 
 beforeAll(() => {
   process.env.BETTER_AUTH_SECRET = 'unit-tests-only-not-a-real-secret';
@@ -20,9 +24,9 @@ describe('document links', () => {
 
   it('rejects a token whose claims were edited', () => {
     const [, signature] = createDocumentToken(claims).split('.');
-    const forged = Buffer.from(JSON.stringify({ ...claims, quoteId: 'cother00000000000000000001' })).toString(
-      'base64url',
-    );
+    const forged = Buffer.from(
+      JSON.stringify({ ...claims, quoteId: 'cother00000000000000000001' }),
+    ).toString('base64url');
     expect(verifyDocumentToken(`${forged}.${signature}`, NOW)).toBeNull();
   });
 
@@ -36,7 +40,10 @@ describe('document links', () => {
     }
   });
 
-  it.each(['', 'abc', 'a.b.c', '.', 'not-base64.sig'])('rejects malformed input %j without throwing', (token) => {
-    expect(verifyDocumentToken(token, NOW)).toBeNull();
-  });
+  it.each(['', 'abc', 'a.b.c', '.', 'not-base64.sig'])(
+    'rejects malformed input %j without throwing',
+    (token) => {
+      expect(verifyDocumentToken(token, NOW)).toBeNull();
+    },
+  );
 });

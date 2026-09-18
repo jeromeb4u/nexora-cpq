@@ -9,7 +9,10 @@ import { type ProductCategory } from '@nexora/types';
 import { CATEGORY_LABELS } from './labels';
 
 export interface ProductFiltersProps {
-  readonly categoryCounts: readonly { readonly category: ProductCategory; readonly count: number }[];
+  readonly categoryCounts: readonly {
+    readonly category: ProductCategory;
+    readonly count: number;
+  }[];
 }
 
 type StatusFilter = 'all' | 'active' | 'withdrawn';
@@ -127,7 +130,7 @@ export function ProductFilters({ categoryCounts }: ProductFiltersProps) {
                 onClick={() => setStatusFilter(option.value)}
                 aria-pressed={active}
                 className={cn(
-                  'rounded-sm border px-2.5 py-1 text-2xs font-medium transition-colors',
+                  'text-2xs rounded-sm border px-2.5 py-1 font-medium transition-colors',
                   active
                     ? 'border-[var(--accent-border)] bg-[var(--surface-selected)] text-[var(--text-link)]'
                     : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]',
@@ -165,14 +168,14 @@ export function ProductFilters({ categoryCounts }: ProductFiltersProps) {
               onClick={() => toggleCategory(category)}
               aria-pressed={active}
               className={cn(
-                'rounded-full border px-2.5 py-1 text-2xs font-medium transition-colors',
+                'text-2xs rounded-full border px-2.5 py-1 font-medium transition-colors',
                 active
                   ? 'border-[var(--accent-border)] bg-[var(--surface-selected)] text-[var(--text-link)]'
                   : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]',
               )}
             >
               {CATEGORY_LABELS[category]}
-              <span className="ml-1 tabular text-[var(--text-tertiary)]">{count}</span>
+              <span className="tabular ml-1 text-[var(--text-tertiary)]">{count}</span>
             </button>
           );
         })}

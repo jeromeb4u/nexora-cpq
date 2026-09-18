@@ -70,7 +70,7 @@ export function ReviewStep({
               <TableRow key={line.productId}>
                 <TableCell>
                   <span className="font-medium text-[var(--text-primary)]">{line.name}</span>
-                  <span className="block font-mono text-2xs text-[var(--text-tertiary)]">
+                  <span className="text-2xs block font-mono text-[var(--text-tertiary)]">
                     {line.sku}
                   </span>
                 </TableCell>
@@ -104,7 +104,10 @@ export function ReviewStep({
           </TableBody>
           <tfoot className="border-t border-[var(--border-default)] bg-[var(--surface-sunken)]">
             <tr>
-              <td className="px-3 py-2.5 text-sm font-medium text-[var(--text-primary)]" colSpan={4}>
+              <td
+                className="px-3 py-2.5 text-sm font-medium text-[var(--text-primary)]"
+                colSpan={4}
+              >
                 Totals
               </td>
               <td className="tabular px-3 py-2.5 text-right text-sm font-semibold text-[var(--text-primary)]">
@@ -140,7 +143,7 @@ export function ReviewStep({
             {discountReason}
           </p>
           {evaluation.requiresApproval ? (
-            <p className="mt-2 text-2xs text-[var(--color-warning-700)]">
+            <p className="text-2xs mt-2 text-[var(--color-warning-700)]">
               {evaluation.explanation}
             </p>
           ) : null}
@@ -154,7 +157,10 @@ export function ReviewStep({
           </h3>
           <ul className="mt-2 space-y-1.5">
             {advisory.map((finding) => (
-              <li key={finding.ruleId} className="text-xs leading-relaxed text-[var(--text-secondary)]">
+              <li
+                key={finding.ruleId}
+                className="text-xs leading-relaxed text-[var(--text-secondary)]"
+              >
                 · {finding.message}
               </li>
             ))}

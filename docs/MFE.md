@@ -3,10 +3,10 @@
 Nexora is split into exactly two micro frontends — not six. The split follows a
 real ownership line: **who a customer is** versus **what we are selling them**.
 
-| Zone | Project | Owns | Writes |
-|---|---|---|---|
-| **Platform** (default app) | `apps/platform` → `nexora-platform` | sign-in and sessions, dashboard, customers and locations, activity, profile, settings | users' own profile, customers, locations, audit for those |
-| **CPQ** | `apps/cpq` → `nexora-cpq` | product catalogue, configurator, pricing, approvals, quotes, versions, quote documents, quote emails | quotes, versions, items, approvals, notifications, audit for those |
+| Zone                       | Project                             | Owns                                                                                                 | Writes                                                             |
+| -------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Platform** (default app) | `apps/platform` → `nexora-platform` | sign-in and sessions, dashboard, customers and locations, activity, profile, settings                | users' own profile, customers, locations, audit for those          |
+| **CPQ**                    | `apps/cpq` → `nexora-cpq`           | product catalogue, configurator, pricing, approvals, quotes, versions, quote documents, quote emails | quotes, versions, items, approvals, notifications, audit for those |
 
 Both read customers (CPQ needs them to raise a quote); only Platform writes
 them. Both read users and sessions; only Platform's auth routes create them.

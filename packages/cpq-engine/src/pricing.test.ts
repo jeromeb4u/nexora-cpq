@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { type ConfigurationInput, cents, Serviceability } from '@nexora/types';
 
-import { buildPriceLines, calculatePrice, emptyPriceBreakdown, totalContractValue } from './pricing';
+import {
+  buildPriceLines,
+  calculatePrice,
+  emptyPriceBreakdown,
+  totalContractValue,
+} from './pricing';
 import {
   FIB_1G,
   FIB_100,

@@ -26,10 +26,10 @@ See `docs/adr/ADR-009-one-repository-two-projects.md`.
 
 ## The two projects
 
-| Vercel project | Root directory | Role |
-|---|---|---|
+| Vercel project    | Root directory  | Role                                                                                             |
+| ----------------- | --------------- | ------------------------------------------------------------------------------------------------ |
 | `nexora-platform` | `apps/platform` | **Default app.** Owns `microfrontends.json`, authentication, and every route not claimed by CPQ. |
-| `nexora-cpq` | `apps/cpq` | Child app. Claims `/quotes`, `/configure`, `/products`, `/approvals`. |
+| `nexora-cpq`      | `apps/cpq`      | Child app. Claims `/quotes`, `/configure`, `/products`, `/approvals`.                            |
 
 Both must belong to the same **microfrontends group** in Vercel, with
 `nexora-platform` marked as the default application. The group is what makes the
@@ -50,19 +50,19 @@ repository root, so shared packages compile as part of the build:
 
 Set on **both** projects unless noted.
 
-| Variable | Notes |
-|---|---|
-| `DATABASE_URL` | **Pooled** Postgres URL. Used at runtime. Serverless functions may each land in a fresh isolate, so unpooled connections exhaust Postgres quickly. |
-| `DIRECT_DATABASE_URL` | **Direct / unpooled** URL. Used only by Prisma Migrate, which needs advisory locks a pooler drops. |
-| `BETTER_AUTH_SECRET` | `openssl rand -base64 32`. Must be **identical on both projects** — CPQ verifies the session cookie Platform issued, and a differing secret makes every session look forged. |
-| `BETTER_AUTH_URL` | The public origin users browse — the **default app's** production domain, e.g. `https://nexora-platform-gamma.vercel.app`. With a microfrontends group, every route (including CPQ's) is served from this one origin. |
-| `AUTH_TRUSTED_ORIGINS` | Comma-separated. **Must include the public origin.** Better Auth validates the `Origin` header and returns a bare 403 otherwise — and in a micro frontend the browser is never served from an app's own origin. This is the single most common way to break a working deployment. |
-| `NEXT_PUBLIC_PLATFORM_URL` | Public origin. |
-| `NEXT_PUBLIC_CPQ_URL` | Public origin. |
-| `EMAIL_PROVIDER` | `console` for the demo. No credentials needed, and no mail is sent. |
-| `EMAIL_FROM` | e.g. `quotes@nexora-telecom.demo` |
-| `LOG_LEVEL` | `info` in production. |
-| `NEXT_PUBLIC_DEMO_MODE` | `false` hides the demo credential picker on sign-in. Any other value (including unset) shows it. |
+| Variable                   | Notes                                                                                                                                                                                                                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`             | **Pooled** Postgres URL. Used at runtime. Serverless functions may each land in a fresh isolate, so unpooled connections exhaust Postgres quickly.                                                                                                                                |
+| `DIRECT_DATABASE_URL`      | **Direct / unpooled** URL. Used only by Prisma Migrate, which needs advisory locks a pooler drops.                                                                                                                                                                                |
+| `BETTER_AUTH_SECRET`       | `openssl rand -base64 32`. Must be **identical on both projects** — CPQ verifies the session cookie Platform issued, and a differing secret makes every session look forged.                                                                                                      |
+| `BETTER_AUTH_URL`          | The public origin users browse — the **default app's** production domain, e.g. `https://nexora-platform-gamma.vercel.app`. With a microfrontends group, every route (including CPQ's) is served from this one origin.                                                             |
+| `AUTH_TRUSTED_ORIGINS`     | Comma-separated. **Must include the public origin.** Better Auth validates the `Origin` header and returns a bare 403 otherwise — and in a micro frontend the browser is never served from an app's own origin. This is the single most common way to break a working deployment. |
+| `NEXT_PUBLIC_PLATFORM_URL` | Public origin.                                                                                                                                                                                                                                                                    |
+| `NEXT_PUBLIC_CPQ_URL`      | Public origin.                                                                                                                                                                                                                                                                    |
+| `EMAIL_PROVIDER`           | `console` for the demo. No credentials needed, and no mail is sent.                                                                                                                                                                                                               |
+| `EMAIL_FROM`               | e.g. `quotes@nexora-telecom.demo`                                                                                                                                                                                                                                                 |
+| `LOG_LEVEL`                | `info` in production.                                                                                                                                                                                                                                                             |
+| `NEXT_PUBLIC_DEMO_MODE`    | `false` hides the demo credential picker on sign-in. Any other value (including unset) shows it.                                                                                                                                                                                  |
 
 `AUTH_TRUSTED_ORIGINS` also accepts preview deployments; `VERCEL_URL` is trusted
 automatically so branch previews authenticate without extra configuration.

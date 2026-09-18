@@ -28,21 +28,33 @@ describe('quote actions', () => {
   });
 
   it('never lets an owner approve their own quote', () => {
-    expect(ids({ status: 'READY_FOR_REVIEW', actorRole: 'SALES_MANAGER', canDecide: false })).not.toContain(
-      'approve-review',
-    );
+    expect(
+      ids({ status: 'READY_FOR_REVIEW', actorRole: 'SALES_MANAGER', canDecide: false }),
+    ).not.toContain('approve-review');
   });
 
   it('lets another approver approve a quote in review, without edit rights', () => {
     expect(
-      ids({ status: 'READY_FOR_REVIEW', actorId: 'mgr', actorRole: 'SALES_MANAGER', canDecide: true, canEdit: false }),
+      ids({
+        status: 'READY_FOR_REVIEW',
+        actorId: 'mgr',
+        actorRole: 'SALES_MANAGER',
+        canDecide: true,
+        canEdit: false,
+      }),
     ).toEqual(['approve-review']);
   });
 
   it('sends approvers to the queue for escalated quotes', () => {
-    expect(ids({ status: 'APPROVAL_REQUIRED', actorId: 'mgr', actorRole: 'SALES_MANAGER', canDecide: true, canEdit: false })).toEqual([
-      'review-approval',
-    ]);
+    expect(
+      ids({
+        status: 'APPROVAL_REQUIRED',
+        actorId: 'mgr',
+        actorRole: 'SALES_MANAGER',
+        canDecide: true,
+        canEdit: false,
+      }),
+    ).toEqual(['review-approval']);
   });
 
   it('lets the owner withdraw an approval request', () => {
@@ -50,8 +62,12 @@ describe('quote actions', () => {
   });
 
   it('confirms before emailing the customer, naming the recipient', () => {
-    const send = quoteActionsFor({ ...base, status: 'APPROVED' }).find((action) => action.id === 'send');
-    expect(send?.kind === 'transition' && send.confirm?.description).toContain('buyer@example.demo');
+    const send = quoteActionsFor({ ...base, status: 'APPROVED' }).find(
+      (action) => action.id === 'send',
+    );
+    expect(send?.kind === 'transition' && send.confirm?.description).toContain(
+      'buyer@example.demo',
+    );
   });
 
   it('offers only a revival on an expired quote', () => {

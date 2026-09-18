@@ -78,7 +78,9 @@ describe('configuration engine', () => {
         selections: select(FIB_10G.id, ENTERPRISE_ROUTER.id, MANAGED_ROUTER.id),
       });
 
-      const finding = result.findings.find((item) => item.ruleId === 'r_10g_excludes_managed_router');
+      const finding = result.findings.find(
+        (item) => item.ruleId === 'r_10g_excludes_managed_router',
+      );
       expect(finding).toBeDefined();
       expect(finding?.blocking).toBe(true);
       expect(finding?.remedy).toEqual({ kind: 'REMOVE_PRODUCT', productId: MANAGED_ROUTER.id });
@@ -106,7 +108,9 @@ describe('configuration engine', () => {
     });
 
     it('requires an edge device with SD-WAN and forbids the Managed Router', () => {
-      const result = evaluate({ selections: select(FIB_1G.id, SDWAN_ENTERPRISE.id, MANAGED_ROUTER.id) });
+      const result = evaluate({
+        selections: select(FIB_1G.id, SDWAN_ENTERPRISE.id, MANAGED_ROUTER.id),
+      });
 
       expect(findingIds(result)).toContain('r_sdwan_needs_edge');
       expect(findingIds(result)).toContain('r_sdwan_excludes_managed_router');
@@ -171,7 +175,10 @@ describe('configuration engine', () => {
 
   describe('contract term', () => {
     it("enforces a product's own minimum term", () => {
-      const result = evaluate({ selections: select(FIB_1G.id, MANAGED_ROUTER.id), contractMonths: 12 });
+      const result = evaluate({
+        selections: select(FIB_1G.id, MANAGED_ROUTER.id),
+        contractMonths: 12,
+      });
 
       const finding = result.findings.find(
         (item) => item.ruleId === `intrinsic:min-term:${FIB_1G.id}`,
@@ -215,9 +222,7 @@ describe('configuration engine', () => {
         selections: select(FIB_1G.id, ENTERPRISE_ROUTER.id, SDWAN_ENTERPRISE.id, SDWAN_EDGE.id),
       });
 
-      const finding = result.findings.find(
-        (item) => item.ruleId === 'r_sdwan_recommends_firewall',
-      );
+      const finding = result.findings.find((item) => item.ruleId === 'r_sdwan_recommends_firewall');
       expect(finding?.severity).toBe(ValidationSeverity.RECOMMENDATION);
       expect(finding?.blocking).toBe(false);
       expect(result.isValid).toBe(true);

@@ -40,6 +40,9 @@ export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
  */
 export const updateCustomerSchema = createCustomerSchema.partial().extend({
   id: cuidSchema,
+  // Redeclared without its create-time default: .partial() keeps defaults, so
+  // an update that never mentioned status would reset it to PROSPECT.
+  status: customerStatusSchema.optional(),
   website: createCustomerSchema.shape.website.unwrap().nullable().optional(),
   notes: createCustomerSchema.shape.notes.unwrap().nullable().optional(),
 });

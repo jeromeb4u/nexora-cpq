@@ -163,9 +163,7 @@ describe('quote access', () => {
     });
 
     it('lets an administrator read any quote', () => {
-      expect(
-        canReadQuote(context({ actorRole: Role.ADMIN, quoteOwnerId: OTHER_REP })),
-      ).toBe(true);
+      expect(canReadQuote(context({ actorRole: Role.ADMIN, quoteOwnerId: OTHER_REP }))).toBe(true);
     });
   });
 
@@ -189,9 +187,7 @@ describe('quote access', () => {
     });
 
     it('lets an administrator edit any quote', () => {
-      expect(
-        canEditQuote(context({ actorRole: Role.ADMIN, quoteOwnerId: OTHER_REP })),
-      ).toBe(true);
+      expect(canEditQuote(context({ actorRole: Role.ADMIN, quoteOwnerId: OTHER_REP }))).toBe(true);
     });
   });
 

@@ -194,8 +194,7 @@ export const TransitionErrorCode = {
   INSUFFICIENT_ROLE: 'INSUFFICIENT_ROLE',
   SELF_APPROVAL: 'SELF_APPROVAL',
 } as const;
-export type TransitionErrorCode =
-  (typeof TransitionErrorCode)[keyof typeof TransitionErrorCode];
+export type TransitionErrorCode = (typeof TransitionErrorCode)[keyof typeof TransitionErrorCode];
 
 /**
  * Decide whether a status change is permitted.
@@ -242,8 +241,7 @@ export function availableTransitions(
   quoteOwnerId: string,
 ): readonly TransitionRule[] {
   return QUOTE_TRANSITIONS[from].filter(
-    (rule) =>
-      canTransition({ from, to: rule.to, actorRole, actorId, quoteOwnerId }).allowed,
+    (rule) => canTransition({ from, to: rule.to, actorRole, actorId, quoteOwnerId }).allowed,
   );
 }
 

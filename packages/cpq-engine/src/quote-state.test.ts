@@ -219,7 +219,9 @@ describe('quote state machine', () => {
     });
 
     it('offers nothing on a terminal quote', () => {
-      expect(availableTransitions(QuoteStatus.ACCEPTED, Role.ADMIN, MANAGER, OWNER)).toHaveLength(0);
+      expect(availableTransitions(QuoteStatus.ACCEPTED, Role.ADMIN, MANAGER, OWNER)).toHaveLength(
+        0,
+      );
     });
   });
 
@@ -237,9 +239,9 @@ describe('quote state machine', () => {
     it('voids an approval by requiring a return to CONFIGURING to change anything', () => {
       // An approved quote can only be edited by explicitly reopening it, which
       // is what makes "approval applies to a specific version" hold.
-      expect(
-        attempt({ from: QuoteStatus.APPROVED, to: QuoteStatus.CONFIGURING }).allowed,
-      ).toBe(true);
+      expect(attempt({ from: QuoteStatus.APPROVED, to: QuoteStatus.CONFIGURING }).allowed).toBe(
+        true,
+      );
       expect(isEditable(QuoteStatus.APPROVED)).toBe(false);
     });
   });

@@ -464,7 +464,9 @@ export async function requestApproval(
 
   // Submitting straight from configuration passes through review implicitly.
   const path: QuoteStatus[] =
-    quote.status === 'CONFIGURING' ? ['READY_FOR_REVIEW', 'APPROVAL_REQUIRED'] : ['APPROVAL_REQUIRED'];
+    quote.status === 'CONFIGURING'
+      ? ['READY_FOR_REVIEW', 'APPROVAL_REQUIRED']
+      : ['APPROVAL_REQUIRED'];
   assertTransitionPath(actor, quote, path);
 
   const catalogue = await loadCatalogue();
@@ -592,8 +594,13 @@ export async function decideApproval(
 
   // Holding an approver role is not the same as having authority for THIS
   // discount. A manager may reject a 30% request but not approve it.
-  if (data.decision === 'APPROVED' && !canApproveDiscount(actor.role, approval.requestedDiscountBps)) {
-    throw forbidden(`${requestedRate} is above your approval authority. A Pricing Administrator must approve it.`);
+  if (
+    data.decision === 'APPROVED' &&
+    !canApproveDiscount(actor.role, approval.requestedDiscountBps)
+  ) {
+    throw forbidden(
+      `${requestedRate} is above your approval authority. A Pricing Administrator must approve it.`,
+    );
   }
 
   const nextStatus: QuoteStatus = data.decision === 'APPROVED' ? 'APPROVED' : 'REJECTED';
@@ -662,7 +669,9 @@ export async function decideApproval(
   return outcome(
     { status: nextStatus },
     {
-      emails: [nextStatus === 'APPROVED' ? approvalGranted(emailInput) : approvalRejected(emailInput)],
+      emails: [
+        nextStatus === 'APPROVED' ? approvalGranted(emailInput) : approvalRejected(emailInput),
+      ],
       revalidate: ['/approvals', '/quotes', `/quotes/${approval.quoteId}`],
     },
   );
@@ -708,7 +717,9 @@ export async function transitionQuoteStatus(
   const isReviewApproval = to === 'APPROVED';
   if (isReviewApproval) {
     if (quote.status === 'APPROVAL_REQUIRED') {
-      throw conflict('This quote has a pending approval request. Decide it from the approval queue.');
+      throw conflict(
+        'This quote has a pending approval request. Decide it from the approval queue.',
+      );
     }
     if (!canDecideApproval(access)) {
       throw forbidden(
@@ -726,7 +737,8 @@ export async function transitionQuoteStatus(
   assertTransitionPath(actor, quote, [to]);
 
   const version = quote.currentVersion;
-  const needsPricedVersion = to === 'READY_FOR_REVIEW' || to === 'APPROVED' || to === 'SENT_TO_CUSTOMER';
+  const needsPricedVersion =
+    to === 'READY_FOR_REVIEW' || to === 'APPROVED' || to === 'SENT_TO_CUSTOMER';
   if (needsPricedVersion && (!version || version.items.length === 0)) {
     throw conflict('Configure and save at least one product first.');
   }
@@ -743,7 +755,9 @@ export async function transitionQuoteStatus(
       tcv: cents(version.tcvCents),
     });
     if (evaluation.requiresApproval || evaluation.exceedsAllRoles) {
-      throw conflict('This quote exceeds its owner’s authority and needs a formal approval request.');
+      throw conflict(
+        'This quote exceeds its owner’s authority and needs a formal approval request.',
+      );
     }
   }
 

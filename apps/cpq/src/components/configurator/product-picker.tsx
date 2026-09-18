@@ -88,16 +88,16 @@ export function ProductPicker({
                     <span className="text-sm font-medium text-[var(--text-primary)]">
                       {product.name}
                     </span>
-                    <span className="font-mono text-2xs text-[var(--text-tertiary)]">
+                    <span className="text-2xs font-mono text-[var(--text-tertiary)]">
                       {product.sku}
                     </span>
                     {required ? (
-                      <span className="rounded-full bg-[var(--color-warning-50)] px-1.5 py-0.5 text-2xs font-semibold text-[var(--color-warning-700)]">
+                      <span className="text-2xs rounded-full bg-[var(--color-warning-50)] px-1.5 py-0.5 font-semibold text-[var(--color-warning-700)]">
                         Required
                       </span>
                     ) : null}
                     {conflicting ? (
-                      <span className="rounded-full bg-[var(--color-danger-50)] px-1.5 py-0.5 text-2xs font-semibold text-[var(--color-danger-700)]">
+                      <span className="text-2xs rounded-full bg-[var(--color-danger-50)] px-1.5 py-0.5 font-semibold text-[var(--color-danger-700)]">
                         Conflict
                       </span>
                     ) : null}
@@ -138,7 +138,9 @@ export function ProductPicker({
                     <QuantityButton
                       label={`Increase ${product.name} quantity`}
                       disabled={disabled || (quantity ?? 1) >= 999}
-                      onClick={() => onQuantityChange(product.id, Math.min(999, (quantity ?? 1) + 1))}
+                      onClick={() =>
+                        onQuantityChange(product.id, Math.min(999, (quantity ?? 1) + 1))
+                      }
                     >
                       <Plus className="size-3" aria-hidden />
                     </QuantityButton>
@@ -147,7 +149,7 @@ export function ProductPicker({
               ) : null}
 
               {selected && product.pricingModel === PricingModel.PER_SITE ? (
-                <p className="mt-2 flex items-center gap-1.5 border-t border-[var(--border-subtle)] pt-2 text-2xs text-[var(--text-tertiary)]">
+                <p className="text-2xs mt-2 flex items-center gap-1.5 border-t border-[var(--border-subtle)] pt-2 text-[var(--text-tertiary)]">
                   <Lock className="size-3" aria-hidden />
                   Billed once per site — quantity follows the site count.
                 </p>

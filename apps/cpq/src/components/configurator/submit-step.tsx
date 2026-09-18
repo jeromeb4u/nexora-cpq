@@ -14,7 +14,8 @@ export interface SubmitStepProps {
   readonly evaluation: DiscountEvaluation;
   readonly discountReason: string;
   readonly hasUnsavedWork: boolean;
-  readonly onSaveFirst: () => Promise<boolean>;
+  /** Saves the current configuration and resolves to the version id it created. */
+  readonly onSaveFirst: () => Promise<string | null>;
   readonly onDone: () => void;
 }
 
@@ -40,10 +41,21 @@ export function SubmitStep({
   const [justification, setJustification] = useState(discountReason);
   const [error, setError] = useState<string | null>(null);
 
-  /** Never submit a version the server has not seen. */
-  async function ensureSaved(): Promise<boolean> {
-    if (!hasUnsavedWork) return true;
-    return onSaveFirst();
+  /**
+   * The id of the version this submission is for.
+   *
+   * Saving first is what makes that unambiguous: the save cancels any pending
+   * autosave and returns the version it created, so nothing can slip in between
+   * reading the id and the server checking it. With no unsaved work, the
+   * quote's current version is asked for instead.
+   */
+  async function versionToSubmit(): Promise<string | null> {
+    if (hasUnsavedWork) return onSaveFirst();
+    try {
+      return await currentVersionId(quoteId);
+    } catch {
+      return null;
+    }
   }
 
   function handleRequestApproval() {
@@ -55,13 +67,15 @@ export function SubmitStep({
     }
 
     startTransition(async () => {
-      if (!(await ensureSaved())) return;
+      const quoteVersionId = await versionToSubmit();
+      if (!quoteVersionId) {
+        setError('The quote could not be saved, so it was not sent for approval.');
+        return;
+      }
 
-      // The version id is resolved server-side from the quote's current
-      // version, so the client cannot request approval for a stale one.
       const result = await requestApproval({
         quoteId,
-        quoteVersionId: await currentVersionId(quoteId),
+        quoteVersionId,
         justification: justification.trim(),
       });
 
@@ -78,7 +92,10 @@ export function SubmitStep({
     setError(null);
 
     startTransition(async () => {
-      if (!(await ensureSaved())) return;
+      if (hasUnsavedWork && !(await onSaveFirst())) {
+        setError('The quote could not be saved, so its status was not changed.');
+        return;
+      }
 
       const result = await transitionQuoteStatus({
         quoteId,
@@ -97,8 +114,8 @@ export function SubmitStep({
   if (!canProceed) {
     return (
       <Alert variant="danger" title="This quote cannot be submitted yet">
-        The configuration has blocking issues, or nothing has been selected. Go back and resolve
-        the errors listed against each step.
+        The configuration has blocking issues, or nothing has been selected. Go back and resolve the
+        errors listed against each step.
       </Alert>
     );
   }

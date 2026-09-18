@@ -6,20 +6,20 @@ collected below with their reasoning.
 
 ## Architecture decision records
 
-| ADR | Decision |
-|---|---|
-| [001](adr/ADR-001-two-mfes-with-vercel-microfrontends.md) | Two micro frontends, composed with Vercel Microfrontends |
-| [002](adr/ADR-002-pnpm-turborepo-monorepo.md) | pnpm workspaces and Turborepo |
-| [003](adr/ADR-003-integer-cents-and-basis-points.md) | Money in integer cents, rates in basis points |
-| [004](adr/ADR-004-server-authoritative-pricing.md) | Pricing is server-authoritative |
-| [005](adr/ADR-005-rules-as-data.md) | Compatibility rules are data, evaluated by one interpreter |
-| [006](adr/ADR-006-declarative-state-machine.md) | The quote lifecycle is a declarative state machine |
-| [007](adr/ADR-007-append-only-versioning.md) | Quote versions are append-only |
-| [008](adr/ADR-008-isomorphic-engine.md) | A dependency-free engine shared by browser and server |
-| [009](adr/ADR-009-one-repository-two-projects.md) | One repository, two Vercel projects |
-| [010](adr/ADR-010-email-after-commit.md) | Email is sent after commit, at most once |
-| [011](adr/ADR-011-services-behind-thin-actions.md) | Business logic in services; server actions stay thin |
-| [012](adr/ADR-012-on-demand-documents-with-sse.md) | Quote documents are generated on demand, with streamed progress |
+| ADR                                                       | Decision                                                        |
+| --------------------------------------------------------- | --------------------------------------------------------------- |
+| [001](adr/ADR-001-two-mfes-with-vercel-microfrontends.md) | Two micro frontends, composed with Vercel Microfrontends        |
+| [002](adr/ADR-002-pnpm-turborepo-monorepo.md)             | pnpm workspaces and Turborepo                                   |
+| [003](adr/ADR-003-integer-cents-and-basis-points.md)      | Money in integer cents, rates in basis points                   |
+| [004](adr/ADR-004-server-authoritative-pricing.md)        | Pricing is server-authoritative                                 |
+| [005](adr/ADR-005-rules-as-data.md)                       | Compatibility rules are data, evaluated by one interpreter      |
+| [006](adr/ADR-006-declarative-state-machine.md)           | The quote lifecycle is a declarative state machine              |
+| [007](adr/ADR-007-append-only-versioning.md)              | Quote versions are append-only                                  |
+| [008](adr/ADR-008-isomorphic-engine.md)                   | A dependency-free engine shared by browser and server           |
+| [009](adr/ADR-009-one-repository-two-projects.md)         | One repository, two Vercel projects                             |
+| [010](adr/ADR-010-email-after-commit.md)                  | Email is sent after commit, at most once                        |
+| [011](adr/ADR-011-services-behind-thin-actions.md)        | Business logic in services; server actions stay thin            |
+| [012](adr/ADR-012-on-demand-documents-with-sse.md)        | Quote documents are generated on demand, with streamed progress |
 
 ---
 

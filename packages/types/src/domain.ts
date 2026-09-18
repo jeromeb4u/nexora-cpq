@@ -1,11 +1,12 @@
 import type { Cents } from './money';
+import { RuleType } from './enums';
 import type {
   ApprovalReason,
   ContractTerm,
   PricingModel,
   ProductCategory,
   Role,
-  RuleType,
+  RuleEffectKind,
   Serviceability,
   ValidationSeverity,
 } from './enums';
@@ -233,4 +234,30 @@ export interface DiscountEvaluation {
   readonly reasons: readonly ApprovalReason[];
   /** Human-readable explanation rendered in the UI (§16). */
   readonly explanation: string;
+}
+
+/**
+ * The `RuleType` implied by an effect.
+ *
+ * `type` and `effect` describe the same thing at different resolutions, and a
+ * row where they disagree ("REQUIRES" with an "INCOMPATIBLE_WITH_PRODUCT"
+ * effect) is nonsense the rule interpreter would never produce. Deriving one
+ * from the other means an editor cannot create that row at all.
+ */
+export function ruleTypeForEffect(effect: RuleEffectKind): RuleType {
+  switch (effect) {
+    case 'REQUIRES_PRODUCT':
+    case 'REQUIRES_ONE_OF':
+      return RuleType.REQUIRES;
+    case 'INCOMPATIBLE_WITH_PRODUCT':
+      return RuleType.INCOMPATIBLE;
+    case 'RECOMMENDS_PRODUCT':
+      return RuleType.RECOMMENDS;
+    case 'AT_MOST_ONE_OF':
+      return RuleType.MUTUALLY_EXCLUSIVE;
+    case 'MIN_CONTRACT_MONTHS':
+      return RuleType.MIN_CONTRACT_TERM;
+    case 'MIN_SERVICEABILITY':
+      return RuleType.REQUIRES_SERVICEABILITY;
+  }
 }

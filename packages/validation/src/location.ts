@@ -36,6 +36,10 @@ export type CreateLocationInput = z.infer<typeof createLocationSchema>;
  */
 export const updateLocationSchema = createLocationSchema.partial().extend({
   id: cuidSchema,
+  // Redeclared without create-time defaults (see updateCustomerSchema).
+  country: countryCodeSchema.optional(),
+  serviceability: serviceabilitySchema.optional(),
+  isPrimary: z.boolean().optional(),
   addressLine2: createLocationSchema.shape.addressLine2.unwrap().nullable().optional(),
   contactPhone: createLocationSchema.shape.contactPhone.unwrap().nullable().optional(),
   existingConnectivity: createLocationSchema.shape.existingConnectivity

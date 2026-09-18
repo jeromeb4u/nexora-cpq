@@ -53,7 +53,6 @@ export async function generateMetadata({
   return { title: quote.quoteNumber };
 }
 
-
 /**
  * Quote detail: pricing, line items, version history, approvals, the audit
  * trail, and the lifecycle actions this viewer may take.
@@ -61,11 +60,7 @@ export async function generateMetadata({
  * Actions are derived from the state machine for display only; each one is
  * re-authorized by its server action.
  */
-export default async function QuoteDetailPage({
-  params,
-}: {
-  params: Promise<QuotePageParams>;
-}) {
+export default async function QuoteDetailPage({ params }: { params: Promise<QuotePageParams> }) {
   const { quoteId } = await params;
   const { actor, quote, canEdit } = await loadQuote(quoteId);
   const auditEvents = await getQuoteAudit(quote.id);
@@ -149,7 +144,7 @@ export default async function QuoteDetailPage({
           <AuditTimeline events={auditEvents} now={now} />
         </div>
 
-        <div className="order-1 xl:order-2 xl:sticky xl:top-4 xl:self-start">
+        <div className="order-1 xl:sticky xl:top-4 xl:order-2 xl:self-start">
           <PricingSummary version={quote.currentVersion} />
         </div>
       </div>

@@ -99,7 +99,7 @@ export default async function ApprovalsPage() {
                         {' · '}
                         version {version.versionNumber}
                       </p>
-                      <p className="mt-0.5 text-2xs text-[var(--text-tertiary)]">
+                      <p className="text-2xs mt-0.5 text-[var(--text-tertiary)]">
                         Requested by {approval.requestedBy.name} ·{' '}
                         <RelativeTime date={approval.createdAt} now={now} />
                       </p>
@@ -173,7 +173,7 @@ export default async function ApprovalsPage() {
                             className="flex items-baseline justify-between gap-4 text-xs"
                           >
                             <span className="min-w-0 truncate text-[var(--text-secondary)]">
-                              <span className="font-mono text-2xs text-[var(--text-tertiary)]">
+                              <span className="text-2xs font-mono text-[var(--text-tertiary)]">
                                 {item.skuSnapshot}
                               </span>{' '}
                               {item.nameSnapshot}

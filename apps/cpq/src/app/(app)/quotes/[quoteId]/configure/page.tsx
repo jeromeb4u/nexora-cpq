@@ -22,11 +22,7 @@ export const metadata: Metadata = { title: 'Configure' };
  * "the same logic on both sides" costs one prop rather than a duplicated
  * implementation (ADR-008).
  */
-export default async function ConfigurePage({
-  params,
-}: {
-  params: Promise<{ quoteId: string }>;
-}) {
+export default async function ConfigurePage({ params }: { params: Promise<{ quoteId: string }> }) {
   const actor = await requirePagePermission(Permission.QUOTE_READ_OWN);
   const { quoteId } = await params;
 

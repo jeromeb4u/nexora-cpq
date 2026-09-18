@@ -85,10 +85,15 @@ export function LineItemsTable({ items }: LineItemsTableProps) {
         </TableBody>
         <tfoot>
           <TableRow className="hover:bg-transparent">
-            <TableCell colSpan={4} className="text-right text-xs font-semibold text-[var(--text-secondary)]">
+            <TableCell
+              colSpan={4}
+              className="text-right text-xs font-semibold text-[var(--text-secondary)]"
+            >
               Total
             </TableCell>
-            <TableCellNumeric className="font-semibold">{formatMoney(totalMonthly)}</TableCellNumeric>
+            <TableCellNumeric className="font-semibold">
+              {formatMoney(totalMonthly)}
+            </TableCellNumeric>
             <TableCell />
             <TableCellNumeric className="font-semibold">{formatMoney(totalSetup)}</TableCellNumeric>
           </TableRow>

@@ -48,3 +48,4 @@ export * from './configuration';
 export * from './approval';
 export * from './auth';
 export * from './notification';
+export * from './rule';

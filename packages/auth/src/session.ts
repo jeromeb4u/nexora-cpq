@@ -101,10 +101,7 @@ export async function requireActor(headers: Headers): Promise<Actor> {
 }
 
 /** The current actor, or throw unless they hold `permission`. */
-export async function requirePermission(
-  headers: Headers,
-  permission: Permission,
-): Promise<Actor> {
+export async function requirePermission(headers: Headers, permission: Permission): Promise<Actor> {
   const actor = await requireActor(headers);
   if (!can(actor.role, permission)) {
     throw new ForbiddenError(`Your role does not permit this action (${permission}).`);

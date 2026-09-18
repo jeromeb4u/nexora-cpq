@@ -19,7 +19,7 @@ interpreter in `@nexora/cpq-engine` evaluates them.
 ## Consequences
 
 - Adding or retiring a rule is a data change.
-- The vocabulary is closed on purpose: a new *kind* of rule is a code change,
+- The vocabulary is closed on purpose: a new _kind_ of rule is a code change,
   enforced by exhaustive `switch` statements. Arbitrary expressions stored in the
   database would be more flexible and far harder to test and reason about.
 - Messages are written for salespeople and shown verbatim, with one-click

@@ -2,11 +2,11 @@
 
 Three layers, each answering a question the others cannot.
 
-| Layer | Tool | Answers | Needs a database |
-|---|---|---|---|
-| **Unit** | Vitest | Are the rules, prices, policies and helpers correct in isolation? | No |
-| **Integration** | Vitest + PostgreSQL | Do the services enforce those rules against real data — scope, transactions, audit, concurrency guards? | Yes, disposable |
-| **End-to-end** | Playwright | Does a person, in a browser, through the microfrontends edge, get the right outcome? | Yes, disposable |
+| Layer           | Tool                | Answers                                                                                                 | Needs a database |
+| --------------- | ------------------- | ------------------------------------------------------------------------------------------------------- | ---------------- |
+| **Unit**        | Vitest              | Are the rules, prices, policies and helpers correct in isolation?                                       | No               |
+| **Integration** | Vitest + PostgreSQL | Do the services enforce those rules against real data — scope, transactions, audit, concurrency guards? | Yes, disposable  |
+| **End-to-end**  | Playwright          | Does a person, in a browser, through the microfrontends edge, get the right outcome?                    | Yes, disposable  |
 
 ```bash
 pnpm test               # unit tests, every package (runs in CI on every push)
@@ -19,15 +19,15 @@ pnpm typecheck:e2e      # type-check the Playwright suite
 
 ## Unit tests
 
-| Package | What is covered |
-|---|---|
-| `@nexora/cpq-engine` | Configuration rules (every trigger and effect, severities, intrinsic checks), pricing (models, term discounts, per-line ceilings, rounding, TCV), discount authority and escalation, every state-machine transition including self-approval. **Coverage thresholds are enforced.** |
-| `@nexora/auth` | The RBAC matrix, read scopes, edit and decide rules. |
-| `@nexora/validation` | Schema edge cases, e.g. a discount without a reason, a rejection without a note. |
-| `@nexora/observability` | Safe error conversion and references; log redaction. (Money arithmetic in `@nexora/types` is exercised through the pricing tests.) |
-| `@nexora/email` | HTML escaping, link sanitisation, provider selection, never-throwing delivery. |
-| `@nexora/db` | Seed data integrity: enums match Prisma, every rule references real SKUs, price ladders are monotonic; driver selection. |
-| `apps/cpq` | Signed document tokens (tamper, expiry, wrong secret, malformed); SSE framing and incremental parsing; which actions the quote page offers per role and status; PDF rendering (binding and draft) and the pricing integrity check. |
+| Package                 | What is covered                                                                                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@nexora/cpq-engine`    | Configuration rules (every trigger and effect, severities, intrinsic checks), pricing (models, term discounts, per-line ceilings, rounding, TCV), discount authority and escalation, every state-machine transition including self-approval. **Coverage thresholds are enforced.** |
+| `@nexora/auth`          | The RBAC matrix, read scopes, edit and decide rules.                                                                                                                                                                                                                               |
+| `@nexora/validation`    | Schema edge cases, e.g. a discount without a reason, a rejection without a note.                                                                                                                                                                                                   |
+| `@nexora/observability` | Safe error conversion and references; log redaction. (Money arithmetic in `@nexora/types` is exercised through the pricing tests.)                                                                                                                                                 |
+| `@nexora/email`         | HTML escaping, link sanitisation, provider selection, never-throwing delivery.                                                                                                                                                                                                     |
+| `@nexora/db`            | Seed data integrity: enums match Prisma, every rule references real SKUs, price ladders are monotonic; driver selection.                                                                                                                                                           |
+| `apps/cpq`              | Signed document tokens (tamper, expiry, wrong secret, malformed); SSE framing and incremental parsing; which actions the quote page offers per role and status; PDF rendering (binding and draft) and the pricing integrity check.                                                 |
 
 Regression tests are named for the bug they pin, e.g. the per-line discount
 ceiling and "different requested discounts must produce different totals".
@@ -43,7 +43,7 @@ code without an HTTP layer.
 Highlights from the CPQ suite:
 
 - prices sent by a client are ignored; a 99% request is stored as 35%;
-- another rep's quote is *not found*, not forbidden;
+- another rep's quote is _not found_, not forbidden;
 - request → approve → send runs end to end and produces exactly the expected
   emails, with a customer document link that verifies;
 - a manager can reject but not approve above 20%; only eligible approvers are notified;
@@ -55,7 +55,7 @@ Highlights from the CPQ suite:
 The Platform suite covers customers and locations: reps may only own their own
 customers and cannot take over a colleague's; pricing administrators cannot
 create customers; duplicate VAT numbers are conflicts; audit records changed
-field *names* only and nothing when nothing changed; clearing an optional field
+field _names_ only and nothing when nothing changed; clearing an optional field
 really clears it; a new primary site demotes the old one; and a location cannot
 be edited through another customer.
 
@@ -88,14 +88,15 @@ service container and needs neither.
 `e2e/*.spec.ts`, run by Playwright against **both apps behind the
 microfrontends proxy** on `http://localhost:3024` — the same composition users get.
 
-| Spec | Scenario |
-|---|---|
-| `notifications.spec.ts` | An approver opens their notifications from the bell, marks them all read, and the badge stays gone after a reload. |
-| `quote-journey.spec.ts` | A sales rep creates a customer and site, raises a quote, configures it, and sends it for approval. |
-| `approval.spec.ts` | A sales manager approves an escalated discount from the queue; the quote shows the approval. |
-| `access-control.spec.ts` | A rep is denied the approval queue, gets the not-found page (with nothing about the quote) for another rep's quote, cannot find it in search, and is sent to sign-in when signed out. |
-| `invalid-configuration.spec.ts` | An invalid combination is explained, cannot be submitted, and the server refuses to produce a document for it. |
-| `revision.spec.ts` | Restoring v1 creates v4 with v1's figures while v1 and v3 remain exactly as they were, and the pending approval is withdrawn. |
+| Spec                            | Scenario                                                                                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `notifications.spec.ts`         | An approver opens their notifications from the bell, marks them all read, and the badge stays gone after a reload.                                                                    |
+| `quote-journey.spec.ts`         | A sales rep creates a customer and site, raises a quote, configures it, and sends it for approval.                                                                                    |
+| `approval.spec.ts`              | A sales manager approves an escalated discount from the queue; the quote shows the approval.                                                                                          |
+| `access-control.spec.ts`        | A rep is denied the approval queue, gets the not-found page (with nothing about the quote) for another rep's quote, cannot find it in search, and is sent to sign-in when signed out. |
+| `invalid-configuration.spec.ts` | An invalid combination is explained, cannot be submitted, and the server refuses to produce a document for it.                                                                        |
+| `catalogue-admin.spec.ts`       | A pricing administrator adds a product, edits its price, withdraws it, writes a rule and disables it; a sales rep sees no edit controls and is refused the page.                      |
+| `revision.spec.ts`              | Restoring v1 creates v4 with v1's figures while v1 and v3 remain exactly as they were, and the pending approval is withdrawn.                                                         |
 
 Each test **reseeds** the database first, so tests are independent and can be
 run alone. Playwright always starts its own servers (`reuseExistingServer:
@@ -127,11 +128,11 @@ bandwidth field blocked saving a location.
 
 `.github/workflows/ci.yml` runs on every push to `main` and every pull request:
 
-| Job | Steps |
-|---|---|
-| **quality** | install (frozen lockfile) → lint → typecheck → typecheck E2E → unit tests → secret scan |
-| **integration** | PostgreSQL 17 service → migrate → seed → integration tests |
-| **e2e** | PostgreSQL 17 service → migrate → production build → Playwright |
+| Job             | Steps                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------- |
+| **quality**     | install (frozen lockfile) → lint → typecheck → typecheck E2E → unit tests → secret scan |
+| **integration** | PostgreSQL 17 service → migrate → seed → integration tests                              |
+| **e2e**         | PostgreSQL 17 service → migrate → production build → Playwright                         |
 
 Vercel deploys independently of CI; a failing CI run does not block a
 deployment, so `main` is expected to stay green.

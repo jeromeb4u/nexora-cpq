@@ -5,7 +5,7 @@
 ## Context
 
 The architecture uses two independently deployable micro frontends. A reasonable
-reading of "independently deployable" is "independently *versioned*", which
+reading of "independently deployable" is "independently _versioned_", which
 points at separate repositories — one per application, plus a third for the
 shared packages published to a registry.
 
@@ -26,7 +26,7 @@ Root Directory, in a shared microfrontends group.
 Two Vercel Projects build, deploy, roll back and scale separately regardless of
 where their source lives. With `turbo-ignore` as the Ignored Build Step, a
 commit touching only `apps/cpq` does not rebuild Platform. Nothing the
-micro-frontend architecture is *for* is lost.
+micro-frontend architecture is _for_ is lost.
 
 **Splitting would create a distributed monolith.** With separate repositories,
 adding one field to a validation schema becomes: publish the package, bump the

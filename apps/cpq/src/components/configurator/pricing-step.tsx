@@ -87,8 +87,7 @@ export function PricingStep({
           Negotiated discount
         </legend>
         <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-          Applied to recurring charges only. Setup fees are cost recovery and are not
-          discountable.
+          Applied to recurring charges only. Setup fees are cost recovery and are not discountable.
         </p>
 
         <div className="mt-3 flex items-center gap-4">
@@ -115,7 +114,7 @@ export function PricingStep({
           </output>
         </div>
 
-        <div className="tabular mt-1 flex justify-between text-2xs text-[var(--text-tertiary)]">
+        <div className="tabular text-2xs mt-1 flex justify-between text-[var(--text-tertiary)]">
           <span>0%</span>
           <span>Your limit: {formatRate(evaluation.roleMaxRate)}</span>
           <span>{formatRate(bpsToRate(maxSelectableBps))}</span>

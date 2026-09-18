@@ -45,14 +45,22 @@ export interface VersionHistoryTableProps {
  * this table is direct proof that history is never overwritten — the current
  * version is the one row where `supersededAt` is still null.
  */
-export function VersionHistoryTable({ quoteId, versions, canRestore, now }: VersionHistoryTableProps) {
+export function VersionHistoryTable({
+  quoteId,
+  versions,
+  canRestore,
+  now,
+}: VersionHistoryTableProps) {
   if (versions.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Version history</CardTitle>
         </CardHeader>
-        <EmptyState title="No versions yet" description="A version is created once this quote is configured." />
+        <EmptyState
+          title="No versions yet"
+          description="A version is created once this quote is configured."
+        />
       </Card>
     );
   }
@@ -84,16 +92,22 @@ export function VersionHistoryTable({ quoteId, versions, canRestore, now }: Vers
             return (
               <TableRow
                 key={version.id}
-                className={cn(isCurrent && 'bg-[var(--surface-selected)] hover:bg-[var(--surface-selected)]')}
+                className={cn(
+                  isCurrent && 'bg-[var(--surface-selected)] hover:bg-[var(--surface-selected)]',
+                )}
               >
                 <TableCell className={cn('font-medium', isCurrent && 'text-[var(--accent-solid)]')}>
                   v{version.versionNumber}
                 </TableCell>
                 <TableCellNumeric>{formatRate(bpsToRate(version.discountBps))}</TableCellNumeric>
-                <TableCellNumeric>{formatRate(bpsToRate(version.effectiveDiscountBps))}</TableCellNumeric>
+                <TableCellNumeric>
+                  {formatRate(bpsToRate(version.effectiveDiscountBps))}
+                </TableCellNumeric>
                 <TableCellNumeric>{formatMoney(cents(version.mrrCents))}</TableCellNumeric>
                 <TableCellNumeric>{formatMoney(cents(version.tcvCents))}</TableCellNumeric>
-                <TableCell className="text-[var(--text-secondary)]">{version.createdBy.name}</TableCell>
+                <TableCell className="text-[var(--text-secondary)]">
+                  {version.createdBy.name}
+                </TableCell>
                 <TableCell className="whitespace-nowrap text-[var(--text-tertiary)]">
                   <RelativeTime date={version.createdAt} now={now} />
                 </TableCell>

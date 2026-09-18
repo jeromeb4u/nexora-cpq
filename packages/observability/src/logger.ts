@@ -27,7 +27,8 @@ const LEVEL_SEVERITY: Record<LogLevel, number> = {
 };
 
 /** Values that may appear in structured log context. */
-export type LogValue = string | number | boolean | null | undefined | LogValue[] | { [key: string]: LogValue };
+export type LogValue =
+  string | number | boolean | null | undefined | LogValue[] | { [key: string]: LogValue };
 export type LogContext = Record<string, LogValue>;
 
 /**
@@ -54,9 +55,7 @@ const MAX_DEPTH = 6;
 
 function shouldRedact(key: string): boolean {
   const normalised = key.toLowerCase().replace(/[-_]/g, '');
-  return REDACTED_KEY_PATTERNS.some((pattern) =>
-    normalised.includes(pattern.replace(/[-_]/g, '')),
-  );
+  return REDACTED_KEY_PATTERNS.some((pattern) => normalised.includes(pattern.replace(/[-_]/g, '')));
 }
 
 /** Recursively strip credential-shaped fields from log context. */

@@ -80,7 +80,11 @@ describe('quote document generation', () => {
   });
 
   it('refuses an expired token', async () => {
-    const token = createDocumentToken({ quoteId, versionId, exp: Math.floor(Date.now() / 1000) - 1 });
+    const token = createDocumentToken({
+      quoteId,
+      versionId,
+      exp: Math.floor(Date.now() / 1000) - 1,
+    });
     const error = await generateQuoteDocument({ kind: 'token', token }, quoteId).catch(
       (thrown: unknown) => thrown,
     );

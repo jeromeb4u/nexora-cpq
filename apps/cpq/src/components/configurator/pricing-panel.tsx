@@ -1,6 +1,12 @@
 'use client';
 
-import { type DiscountEvaluation, type PriceBreakdown, cents, formatMoney, formatRate } from '@nexora/types';
+import {
+  type DiscountEvaluation,
+  type PriceBreakdown,
+  cents,
+  formatMoney,
+  formatRate,
+} from '@nexora/types';
 
 import { cn } from '../cn';
 
@@ -50,13 +56,9 @@ export function PricingPanel({ price, evaluation, isValid }: PricingPanelProps) 
           ))}
 
           <div className="border-t border-[var(--border-subtle)] pt-3">
-            <Row
-              label="Monthly recurring"
-              value={formatMoney(cents(price.mrr))}
-              emphasis
-            />
+            <Row label="Monthly recurring" value={formatMoney(cents(price.mrr))} emphasis />
             {price.effectiveDiscountRate > 0 ? (
-              <p className="tabular mt-0.5 text-right text-2xs text-[var(--text-tertiary)]">
+              <p className="tabular text-2xs mt-0.5 text-right text-[var(--text-tertiary)]">
                 Effective discount {formatRate(price.effectiveDiscountRate)}
               </p>
             ) : null}
@@ -69,21 +71,20 @@ export function PricingPanel({ price, evaluation, isValid }: PricingPanelProps) 
           </div>
 
           {evaluation.someLinesCapped ? (
-            <p className="rounded-md bg-[var(--surface-sunken)] px-2.5 py-2 text-2xs leading-relaxed text-[var(--text-secondary)]">
-              Some products cap their own discount at{' '}
-              {formatRate(evaluation.tightestProductRate)}, so the effective rate is below the
-              headline one.
+            <p className="text-2xs rounded-md bg-[var(--surface-sunken)] px-2.5 py-2 leading-relaxed text-[var(--text-secondary)]">
+              Some products cap their own discount at {formatRate(evaluation.tightestProductRate)},
+              so the effective rate is below the headline one.
             </p>
           ) : null}
 
           {evaluation.requiresApproval ? (
-            <p className="rounded-md border border-[var(--color-warning-200)] bg-[var(--color-warning-50)] px-2.5 py-2 text-2xs leading-relaxed text-[var(--color-warning-700)]">
+            <p className="text-2xs rounded-md border border-[var(--color-warning-200)] bg-[var(--color-warning-50)] px-2.5 py-2 leading-relaxed text-[var(--color-warning-700)]">
               {evaluation.explanation}
             </p>
           ) : null}
 
           {!isValid ? (
-            <p className="rounded-md border border-[var(--color-danger-200)] bg-[var(--color-danger-50)] px-2.5 py-2 text-2xs leading-relaxed text-[var(--color-danger-700)]">
+            <p className="text-2xs rounded-md border border-[var(--color-danger-200)] bg-[var(--color-danger-50)] px-2.5 py-2 leading-relaxed text-[var(--color-danger-700)]">
               This price is provisional — the configuration has blocking issues.
             </p>
           ) : null}

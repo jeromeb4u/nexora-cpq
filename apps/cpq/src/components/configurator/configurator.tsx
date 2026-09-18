@@ -172,7 +172,22 @@ export function Configurator(props: ConfiguratorProps) {
   const canSave =
     selections.size > 0 && validation.isValid && (discountBps === 0 || discountReason.length >= 10);
 
-  const saveNow = useCallback(async () => {
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dirtyRef = useRef(false);
+  const firstRenderRef = useRef(true);
+
+  /**
+   * Save, and report which version the server created.
+   *
+   * Any pending autosave is cancelled first. Submitting used to race it: the
+   * submit step read the quote's current version id, the debounce fired, and
+   * the server then refused the request as being for a superseded version.
+   */
+  const saveNow = useCallback(async (): Promise<string | null> => {
+    if (autosaveTimer.current) {
+      clearTimeout(autosaveTimer.current);
+      autosaveTimer.current = null;
+    }
     setSaveState('saving');
 
     const result = await saveConfiguration({
@@ -187,16 +202,21 @@ export function Configurator(props: ConfiguratorProps) {
     if (result.ok) {
       setSaveState('saved');
       setLastSavedAt(new Date().toLocaleTimeString('en-GB'));
-      return true;
+      dirtyRef.current = false;
+      return result.data.versionId;
     }
 
     setSaveState('error');
     toast.error(result.message, { description: `Reference ${result.reference}` });
-    return false;
-  }, [props.quoteId, configuration.selections, contractMonths, siteCount, discountBps, discountReason]);
-
-  const dirtyRef = useRef(false);
-  const firstRenderRef = useRef(true);
+    return null;
+  }, [
+    props.quoteId,
+    configuration.selections,
+    contractMonths,
+    siteCount,
+    discountBps,
+    discountReason,
+  ]);
 
   useEffect(() => {
     if (firstRenderRef.current) {
@@ -209,8 +229,8 @@ export function Configurator(props: ConfiguratorProps) {
 
     const timer = setTimeout(() => {
       void saveNow();
-      dirtyRef.current = false;
     }, AUTOSAVE_DELAY_MS);
+    autosaveTimer.current = timer;
 
     return () => clearTimeout(timer);
   }, [canSave, saveNow]);
@@ -270,14 +290,11 @@ export function Configurator(props: ConfiguratorProps) {
   const isFirst = index === 0;
   const isLast = index === STEPS.length - 1;
 
-  const goTo = useCallback(
-    (target: StepId) => {
-      setStep(target);
-      // Long steps leave the user mid-page; start each step at the top.
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    },
-    [],
-  );
+  const goTo = useCallback((target: StepId) => {
+    setStep(target);
+    // Long steps leave the user mid-page; start each step at the top.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const categoryProducts = useMemo(() => {
     if (!definition?.category) return [];
@@ -433,7 +450,7 @@ export function Configurator(props: ConfiguratorProps) {
         </nav>
       </div>
 
-      <div className="xl:order-3 xl:sticky xl:top-4 xl:self-start">
+      <div className="xl:sticky xl:top-4 xl:order-3 xl:self-start">
         <PricingPanel price={price} evaluation={discount} isValid={validation.isValid} />
       </div>
     </div>
@@ -451,7 +468,7 @@ function SaveIndicator({
 }) {
   if (state === 'saving') {
     return (
-      <span className="flex items-center gap-1.5 text-2xs text-[var(--text-tertiary)]">
+      <span className="text-2xs flex items-center gap-1.5 text-[var(--text-tertiary)]">
         <Loader className="size-3 animate-spin" aria-hidden />
         Saving…
       </span>
@@ -460,7 +477,7 @@ function SaveIndicator({
 
   if (state === 'saved') {
     return (
-      <span className="flex items-center gap-1.5 text-2xs text-[var(--color-success-600)]">
+      <span className="text-2xs flex items-center gap-1.5 text-[var(--color-success-600)]">
         <Check className="size-3" aria-hidden />
         Draft saved{lastSavedAt ? ` at ${lastSavedAt}` : ''}
       </span>
@@ -505,7 +522,7 @@ function SummaryCard({
       </dl>
       {children}
       {note ? (
-        <p className="mt-3 border-t border-[var(--border-subtle)] pt-3 text-2xs leading-relaxed text-[var(--text-tertiary)]">
+        <p className="text-2xs mt-3 border-t border-[var(--border-subtle)] pt-3 leading-relaxed text-[var(--text-tertiary)]">
           {note}
         </p>
       ) : null}

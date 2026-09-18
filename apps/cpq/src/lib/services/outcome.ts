@@ -18,7 +18,10 @@ export interface ServiceOutcome<T> {
 
 export function outcome<T>(
   data: T,
-  effects: { readonly emails?: readonly EmailMessage[]; readonly revalidate?: readonly string[] } = {},
+  effects: {
+    readonly emails?: readonly EmailMessage[];
+    readonly revalidate?: readonly string[];
+  } = {},
 ): ServiceOutcome<T> {
   return { data, emails: effects.emails ?? [], revalidate: effects.revalidate ?? [] };
 }

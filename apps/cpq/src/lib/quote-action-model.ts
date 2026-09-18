@@ -84,7 +84,12 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
     });
   }
 
-  const transitions = availableTransitions(status, context.actorRole, context.actorId, context.ownerId);
+  const transitions = availableTransitions(
+    status,
+    context.actorRole,
+    context.actorId,
+    context.ownerId,
+  );
 
   for (const { to } of transitions) {
     // Approval requests and decisions carry a justification or note, so they
@@ -116,9 +121,20 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
     switch (to) {
       case 'CONFIGURING':
         if (status === 'EXPIRED') {
-          actions.push({ kind: 'revise', id: 'revive', label: 'Revive as new version', emphasis: 'primary' });
+          actions.push({
+            kind: 'revise',
+            id: 'revive',
+            label: 'Revive as new version',
+            emphasis: 'primary',
+          });
         } else if (status === 'READY_FOR_REVIEW') {
-          actions.push({ kind: 'transition', id: 'reopen', label: 'Reopen for changes', to, emphasis: 'secondary' });
+          actions.push({
+            kind: 'transition',
+            id: 'reopen',
+            label: 'Reopen for changes',
+            to,
+            emphasis: 'secondary',
+          });
         } else if (status === 'APPROVAL_REQUIRED') {
           actions.push({
             kind: 'transition',
@@ -128,7 +144,8 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
             emphasis: 'secondary',
             confirm: {
               title: 'Withdraw the approval request?',
-              description: 'The request leaves the approval queue and the quote returns to configuration.',
+              description:
+                'The request leaves the approval queue and the quote returns to configuration.',
               confirmLabel: 'Withdraw request',
               tone: 'default',
             },
@@ -142,7 +159,8 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
             emphasis: 'secondary',
             confirm: {
               title: `Reopen ${quoteNumber}?`,
-              description: 'The current approval will no longer apply. Changed terms must be approved again.',
+              description:
+                'The current approval will no longer apply. Changed terms must be approved again.',
               confirmLabel: 'Reopen quote',
               tone: 'default',
             },
@@ -153,7 +171,13 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
 
       case 'READY_FOR_REVIEW':
         if (context.hasVersion) {
-          actions.push({ kind: 'transition', id: 'submit-review', label: 'Submit for review', to, emphasis: 'primary' });
+          actions.push({
+            kind: 'transition',
+            id: 'submit-review',
+            label: 'Submit for review',
+            to,
+            emphasis: 'primary',
+          });
         }
         break;
 
@@ -182,7 +206,8 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
           emphasis: 'primary',
           confirm: {
             title: `Mark ${quoteNumber} as accepted?`,
-            description: 'Record that the customer has signed. Accepted quotes are final and cannot be changed.',
+            description:
+              'Record that the customer has signed. Accepted quotes are final and cannot be changed.',
             confirmLabel: 'Mark accepted',
             tone: 'default',
           },
@@ -214,7 +239,8 @@ export function quoteActionsFor(context: QuoteActionContext): QuoteAction[] {
           emphasis: 'destructive',
           confirm: {
             title: `Cancel ${quoteNumber}?`,
-            description: 'Cancelled quotes are closed permanently. Their history remains available.',
+            description:
+              'Cancelled quotes are closed permanently. Their history remains available.',
             confirmLabel: 'Cancel quote',
             tone: 'destructive',
           },

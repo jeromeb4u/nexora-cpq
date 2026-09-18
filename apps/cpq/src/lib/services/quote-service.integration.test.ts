@@ -4,13 +4,7 @@ import type { Actor } from '@nexora/auth/session';
 import { type ErrorCode, isAppError } from '@nexora/observability';
 import { EmailTemplateId } from '@nexora/email';
 
-import {
-  USERS,
-  acmeMunich,
-  actorFor,
-  bundleSelections,
-  foreignLocation,
-} from '@/test/fixtures';
+import { USERS, acmeMunich, actorFor, bundleSelections, foreignLocation } from '@/test/fixtures';
 import { verifyDocumentToken } from './document-link';
 import {
   createQuote,
@@ -69,7 +63,8 @@ async function configuredQuote(discountBps: number) {
     contractMonths: 36,
     siteCount: 1,
     requestedDiscountBps: discountBps,
-    discountReason: discountBps > 0 ? 'Competitive tender against the incumbent carrier.' : undefined,
+    discountReason:
+      discountBps > 0 ? 'Competitive tender against the incumbent carrier.' : undefined,
   });
   return { quoteId: created.data.quoteId, versionId: saved.data.versionId, saved };
 }
@@ -176,7 +171,11 @@ describe('approval workflow', () => {
     const { quoteId, versionId } = await configuredQuote(1_800);
 
     await expectAppError(
-      requestApproval(rep, { quoteId, quoteVersionId: 'c' + 'x'.repeat(24), justification: 'Stale version id here.' }),
+      requestApproval(rep, {
+        quoteId,
+        quoteVersionId: 'c' + 'x'.repeat(24),
+        justification: 'Stale version id here.',
+      }),
       'CONFLICT',
     );
 
@@ -190,7 +189,9 @@ describe('approval workflow', () => {
     expect(afterRequest.status).toBe('APPROVAL_REQUIRED');
     expect(requested.emails.map((email) => email.to)).toContain(USERS.manager);
     expect(requested.emails.map((email) => email.to)).not.toContain(USERS.rep);
-    expect(requested.emails.every((email) => email.template === EmailTemplateId.APPROVAL_REQUESTED)).toBe(true);
+    expect(
+      requested.emails.every((email) => email.template === EmailTemplateId.APPROVAL_REQUESTED),
+    ).toBe(true);
 
     await expectAppError(
       decideApproval(rep, { approvalId: requested.data.approvalId, decision: 'APPROVED' }),
@@ -226,7 +227,9 @@ describe('approval workflow', () => {
     const claims = verifyDocumentToken(decodeURIComponent(link?.[1] ?? ''));
     expect(claims).toMatchObject({ quoteId, versionId });
 
-    const audit = await prisma.auditEvent.findFirst({ where: { entityId: quoteId, action: 'QUOTE_SENT' } });
+    const audit = await prisma.auditEvent.findFirst({
+      where: { entityId: quoteId, action: 'QUOTE_SENT' },
+    });
     expect(audit).not.toBeNull();
   });
 
@@ -311,12 +314,16 @@ describe('versioning', () => {
     });
     expect(after).toEqual(before);
 
-    const copy = await prisma.quoteVersion.findUniqueOrThrow({ where: { id: revision.data.versionId } });
+    const copy = await prisma.quoteVersion.findUniqueOrThrow({
+      where: { id: revision.data.versionId },
+    });
     expect(copy.versionNumber).toBe(3);
     expect(copy.mrrCents).toBe(before.mrrCents);
     expect(copy.contractMonths).toBe(before.contractMonths);
 
-    const superseded = await prisma.quoteVersion.findUniqueOrThrow({ where: { id: second.data.versionId } });
+    const superseded = await prisma.quoteVersion.findUniqueOrThrow({
+      where: { id: second.data.versionId },
+    });
     expect(superseded.supersededAt).not.toBeNull();
 
     const quote = await prisma.quote.findUniqueOrThrow({ where: { id: quoteId } });

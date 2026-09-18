@@ -172,8 +172,7 @@ export function canReadQuote(context: QuoteAccessContext): boolean {
 export function canEditQuote(context: QuoteAccessContext): boolean {
   if (can(context.actorRole, Permission.QUOTE_UPDATE_ANY)) return true;
   return (
-    can(context.actorRole, Permission.QUOTE_UPDATE_OWN) &&
-    context.quoteOwnerId === context.actorId
+    can(context.actorRole, Permission.QUOTE_UPDATE_OWN) && context.quoteOwnerId === context.actorId
   );
 }
 

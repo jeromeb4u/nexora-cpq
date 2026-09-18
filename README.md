@@ -15,11 +15,11 @@ repository is invented demonstration data.
 Not a landing page or a set of screens — a system with the parts that are
 usually hand-waved in portfolio projects:
 
-- **A real business-rule engine.** Compatibility rules are *data* in the
+- **A real business-rule engine.** Compatibility rules are _data_ in the
   database, evaluated by one interpreter. Adding a rule never means touching a
   component.
 - **Server-authoritative pricing.** The browser sends product ids, quantities, a
-  term and a *requested* discount. It cannot send money. A client posting
+  term and a _requested_ discount. It cannot send money. A client posting
   `discount: 99` is clamped by the discount engine and repriced from catalogue
   rows it never touched.
 - **A quote state machine.** Transitions are declared in a table with the roles
@@ -28,7 +28,7 @@ usually hand-waved in portfolio projects:
 - **Append-only quote history.** Versions are superseded, never overwritten.
 - **Authorization compiled into queries.** Quote visibility becomes a `WHERE`
   clause rather than a check applied after fetching, which is what prevents
-  IDOR. An invisible quote reports as *not found*, so a probe learns nothing.
+  IDOR. An invisible quote reports as _not found_, so a probe learns nothing.
 
 ---
 
@@ -36,10 +36,10 @@ usually hand-waved in portfolio projects:
 
 Two independently deployable Next.js applications behind one origin:
 
-| Zone | Owns | Routes |
-|---|---|---|
-| **Platform** (default app) | authentication, dashboard, customers, activity, profile | `/`, `/dashboard`, `/customers/*`, `/activity`, `/api/auth/*` |
-| **CPQ** | catalogue, configurator, pricing, approvals, quote documents | `/quotes/*`, `/configure`, `/products`, `/approvals` |
+| Zone                       | Owns                                                         | Routes                                                        |
+| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| **Platform** (default app) | authentication, dashboard, customers, activity, profile      | `/`, `/dashboard`, `/customers/*`, `/activity`, `/api/auth/*` |
+| **CPQ**                    | catalogue, configurator, pricing, approvals, quote documents | `/quotes/*`, `/configure`, `/products`, `/approvals`          |
 
 Routing is declared once in [`apps/platform/microfrontends.json`](apps/platform/microfrontends.json).
 The two apps never import each other's internals — they communicate through
@@ -99,12 +99,12 @@ free tier. Two URLs are needed and they are genuinely different:
 
 Password for all: `NexoraDemo123!`
 
-| Email | Role | What they can do |
-|---|---|---|
-| `sales@nexora.demo` | Sales Representative | Owns QT-10482. Discount authority 10%. |
-| `salesmanager@nexora.demo` | Sales Manager | Approves to 20%. Has a quote waiting. |
-| `pricing@nexora.demo` | Pricing Administrator | Owns catalogue, rules and thresholds. |
-| `admin@nexora.demo` | Administrator | Full access. |
+| Email                      | Role                  | What they can do                       |
+| -------------------------- | --------------------- | -------------------------------------- |
+| `sales@nexora.demo`        | Sales Representative  | Owns QT-10482. Discount authority 10%. |
+| `salesmanager@nexora.demo` | Sales Manager         | Approves to 20%. Has a quote waiting.  |
+| `pricing@nexora.demo`      | Pricing Administrator | Owns catalogue, rules and thresholds.  |
+| `admin@nexora.demo`        | Administrator         | Full access.                           |
 
 **Start here:** sign in as the sales rep and open **QT-10482** — a €4,143/month
 ACME GmbH quote at an 18% discount, which exceeds a rep's authority and is
@@ -116,19 +116,19 @@ escalation, the state machine and the audit trail in one go.
 
 ## Scripts
 
-| Command | Does |
-|---|---|
-| `pnpm dev` | both apps + the MFE proxy |
-| `pnpm build` | production build of everything |
-| `pnpm typecheck` | TypeScript, strict, across all packages |
-| `pnpm lint` | ESLint |
-| `pnpm test` | unit tests |
-| `pnpm test:integration` | service tests against PostgreSQL (`TEST_DATABASE_URL`) |
-| `pnpm test:e2e` | Playwright through the MFE proxy (`E2E_DATABASE_URL`) |
-| `pnpm db:setup` | generate → migrate → seed |
-| `pnpm db:seed` | reseed (deterministic — same data every time) |
-| `pnpm --filter @nexora/db seed:verify` | assert the seeded scenario is coherent |
-| `pnpm db:studio` | Prisma Studio |
+| Command                                | Does                                                   |
+| -------------------------------------- | ------------------------------------------------------ |
+| `pnpm dev`                             | both apps + the MFE proxy                              |
+| `pnpm build`                           | production build of everything                         |
+| `pnpm typecheck`                       | TypeScript, strict, across all packages                |
+| `pnpm lint`                            | ESLint                                                 |
+| `pnpm test`                            | unit tests                                             |
+| `pnpm test:integration`                | service tests against PostgreSQL (`TEST_DATABASE_URL`) |
+| `pnpm test:e2e`                        | Playwright through the MFE proxy (`E2E_DATABASE_URL`)  |
+| `pnpm db:setup`                        | generate → migrate → seed                              |
+| `pnpm db:seed`                         | reseed (deterministic — same data every time)          |
+| `pnpm --filter @nexora/db seed:verify` | assert the seeded scenario is coherent                 |
+| `pnpm db:studio`                       | Prisma Studio                                          |
 
 ---
 
@@ -148,9 +148,9 @@ Feature-complete for the brief: authentication and RBAC · dashboard · customer
 and locations · quote list, detail, lifecycle actions and versioning · the
 ten-step configurator with live rule validation · pricing and discount engines ·
 approvals with authority limits · audit trail · notifications · product
-catalogue · PDF quote documents with streamed generation progress · signed
-customer document links · transactional email · unit, integration and
-end-to-end tests · CI.
+catalogue with administration of products and compatibility rules · PDF quote
+documents with streamed generation progress · signed customer document links ·
+transactional email · unit, integration and end-to-end tests · CI.
 
 Known gaps are listed honestly in the
 [case study](docs/PORTFOLIO-CASE-STUDY.md#trade-offs-stated-plainly).
@@ -159,17 +159,17 @@ Known gaps are listed honestly in the
 
 ## Documentation
 
-| | |
-|---|---|
-| [Architecture](docs/ARCHITECTURE.md) | system context, packages, request lifecycle, quote lifecycle |
-| [Micro frontends](docs/MFE.md) | zone ownership, routing, shared session and shell |
-| [Database](docs/DATABASE.md) | model, money, indexes, migrations, seed |
-| [CPQ rules](docs/CPQ-RULES.md) | rules, pricing, discount authority, state machine |
-| [Security](docs/SECURITY.md) | threat model, authN/authZ, audit |
-| [Testing](docs/TESTING.md) | the three test layers and CI |
-| [Deployment](docs/DEPLOYMENT.md) | Vercel projects, environment, free tier |
-| [Decisions](docs/DECISIONS.md) | ADR index and smaller decisions |
-| [Case study](docs/PORTFOLIO-CASE-STUDY.md) | the problem, the design, what went wrong |
+|                                            |                                                              |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| [Architecture](docs/ARCHITECTURE.md)       | system context, packages, request lifecycle, quote lifecycle |
+| [Micro frontends](docs/MFE.md)             | zone ownership, routing, shared session and shell            |
+| [Database](docs/DATABASE.md)               | model, money, indexes, migrations, seed                      |
+| [CPQ rules](docs/CPQ-RULES.md)             | rules, pricing, discount authority, state machine            |
+| [Security](docs/SECURITY.md)               | threat model, authN/authZ, audit                             |
+| [Testing](docs/TESTING.md)                 | the three test layers and CI                                 |
+| [Deployment](docs/DEPLOYMENT.md)           | Vercel projects, environment, free tier                      |
+| [Decisions](docs/DECISIONS.md)             | ADR index and smaller decisions                              |
+| [Case study](docs/PORTFOLIO-CASE-STUDY.md) | the problem, the design, what went wrong                     |
 
 ---
 

@@ -32,6 +32,8 @@ describe('server-sent events', () => {
 
   it('joins multi-line data and defaults the event name', () => {
     const push = createServerSentEventParser();
-    expect(push('data: first\ndata: second\n\n')).toEqual([{ event: 'message', data: 'first\nsecond' }]);
+    expect(push('data: first\ndata: second\n\n')).toEqual([
+      { event: 'message', data: 'first\nsecond' },
+    ]);
   });
 });

@@ -39,8 +39,20 @@ export const createProductSchema = z.object({
 });
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 
+/**
+ * A partial update: an omitted field means "leave it as it is".
+ *
+ * The fields that carry a `.default()` on create are redeclared without one.
+ * `.partial()` makes a field optional but keeps its default, so a request that
+ * only renamed a product would also quietly reset its pricing model, minimum
+ * term, sort order and availability to the create-time defaults.
+ */
 export const updateProductSchema = createProductSchema.partial().extend({
   id: cuidSchema,
+  pricingModel: pricingModelSchema.optional(),
+  minContractMonths: contractTermSchema.optional(),
+  isActive: z.boolean().optional(),
+  sortOrder: z.int({ error: 'Sort order must be a whole number.' }).optional(),
 });
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 

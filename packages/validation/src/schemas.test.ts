@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { approvalDecisionSchema } from './approval';
 import { basisPointsSchema } from './common';
 import { configurationSelectionSchema, saveConfigurationSchema } from './configuration';
-import { createCustomerSchema, customerListQuerySchema } from './customer';
-import { createLocationSchema } from './location';
-import { createProductSchema } from './product';
+import { createCustomerSchema, customerListQuerySchema, updateCustomerSchema } from './customer';
+import { createLocationSchema, updateLocationSchema } from './location';
+import { createProductSchema, updateProductSchema } from './product';
+import { createRuleSchema } from './rule';
 
 const validCustomer = {
   companyName: 'Nexora Retail GmbH',
@@ -238,5 +239,86 @@ describe('customerListQuerySchema', () => {
     if (result.success) {
       expect(result.data.status).toEqual(['ACTIVE', 'PROSPECT']);
     }
+  });
+});
+
+describe('partial update schemas', () => {
+  const id = 'clz0000000000000000000001';
+
+  /**
+   * `.partial()` makes a field optional but keeps any `.default()` on it, which
+   * would turn "rename this product" into "rename it and reset four other
+   * fields". Every update schema therefore redeclares its defaulted fields.
+   */
+  it('leaves unmentioned fields absent rather than defaulting them', () => {
+    const product = updateProductSchema.parse({ id, name: 'Renamed' });
+    expect(product).toEqual({ id, name: 'Renamed' });
+
+    const customer = updateCustomerSchema.parse({ id, companyName: 'Renamed GmbH' });
+    expect(customer).toEqual({ id, companyName: 'Renamed GmbH' });
+
+    const location = updateLocationSchema.parse({ id, city: 'Hamburg' });
+    expect(location).toEqual({ id, city: 'Hamburg' });
+  });
+
+  it('still applies defaults when creating', () => {
+    const created = createProductSchema.parse({
+      sku: 'TEST-1',
+      name: 'Test',
+      description: 'A test product.',
+      category: 'CONNECTIVITY',
+      monthlyPriceCents: 1000,
+      setupPriceCents: 0,
+      maxDiscountBps: 1000,
+    });
+    expect(created.pricingModel).toBe('FLAT');
+    expect(created.minContractMonths).toBe(12);
+    expect(created.isActive).toBe(true);
+    expect(created.sortOrder).toBe(0);
+  });
+});
+
+describe('rule schemas', () => {
+  const base = {
+    severity: 'ERROR' as const,
+    message: 'A message long enough to be useful to a rep.',
+    priority: 100,
+    isActive: true,
+    triggerKind: 'ALWAYS' as const,
+    effectKind: 'REQUIRES_PRODUCT' as const,
+    targetProductIds: [],
+  };
+
+  it('requires the parameters the chosen kinds need', () => {
+    expect(createRuleSchema.safeParse(base).success).toBe(false);
+
+    expect(
+      createRuleSchema.safeParse({ ...base, effectProductId: 'clz0000000000000000000002' }).success,
+    ).toBe(true);
+
+    const missingThreshold = createRuleSchema.safeParse({
+      ...base,
+      triggerKind: 'BANDWIDTH_AT_LEAST',
+      effectProductId: 'clz0000000000000000000002',
+    });
+    expect(missingThreshold.success).toBe(false);
+  });
+
+  it('rejects a minimum term Nexora does not sell', () => {
+    const result = createRuleSchema.safeParse({
+      ...base,
+      effectKind: 'MIN_CONTRACT_MONTHS',
+      effectThreshold: 18,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a group with duplicates or fewer than two members', () => {
+    const duplicate = createRuleSchema.safeParse({
+      ...base,
+      effectKind: 'AT_MOST_ONE_OF',
+      targetProductIds: ['clz0000000000000000000002', 'clz0000000000000000000002'],
+    });
+    expect(duplicate.success).toBe(false);
   });
 });

@@ -12,7 +12,11 @@ import { AppError, ErrorCode, logger, notFound } from '@nexora/observability';
 
 import { loadCatalogue, loadRules } from '../catalogue';
 import { recordAudit } from '../audit';
-import { type QuoteDocumentModel, isBindingOffer, pricingIntegrityIssues } from '../documents/document-model';
+import {
+  type QuoteDocumentModel,
+  isBindingOffer,
+  pricingIntegrityIssues,
+} from '../documents/document-model';
 import { QuoteDocument } from '../documents/quote-document';
 import { verifyDocumentToken } from './document-link';
 
@@ -102,7 +106,10 @@ async function resolveVersion(access: DocumentAccess, quoteId: string) {
 
   const versionId = access.versionId ?? quote.currentVersionId;
   if (!versionId) {
-    throw new AppError(ErrorCode.CONFLICT, 'Configure and save the quote before generating a document.');
+    throw new AppError(
+      ErrorCode.CONFLICT,
+      'Configure and save the quote before generating a document.',
+    );
   }
   return { versionId, actorId: access.actor.id };
 }
@@ -160,7 +167,10 @@ export async function generateQuoteDocument(
   const [catalogue, rules] = await Promise.all([loadCatalogue(), loadRules()]);
   const validation = evaluateConfiguration(
     {
-      selections: version.items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+      selections: version.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
       contractMonths: version.contractMonths as ContractTerm,
       serviceability: quote.location?.serviceability ?? 'PENDING_CHECK',
       siteCount: snapshotSiteCount(version.configSnapshot),
@@ -270,7 +280,12 @@ export async function generateQuoteDocument(
       access.kind === 'token'
         ? `Customer opened the quote document for version ${version.versionNumber}`
         : `Generated quote document for version ${version.versionNumber}`,
-    metadata: { versionNumber: version.versionNumber, sha256, bytes: bytes.length, via: access.kind },
+    metadata: {
+      versionNumber: version.versionNumber,
+      sha256,
+      bytes: bytes.length,
+      via: access.kind,
+    },
   });
 
   return {

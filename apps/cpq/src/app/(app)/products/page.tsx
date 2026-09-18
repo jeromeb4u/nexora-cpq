@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button, EmptyState, PageHeader } from '@nexora/ui';
-import { Permission } from '@nexora/auth/permissions';
+import { Permission, can } from '@nexora/auth/permissions';
 import { productListQuerySchema } from '@nexora/validation';
 
 import { requirePagePermission } from '@/lib/session';
@@ -28,7 +28,8 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePagePermission(Permission.PRODUCT_READ);
+  const actor = await requirePagePermission(Permission.PRODUCT_READ);
+  const canManage = can(actor.role, Permission.PRODUCT_MANAGE);
   const raw = await searchParams;
 
   const parsed = productListQuerySchema.safeParse(raw);
@@ -42,6 +43,18 @@ export default async function ProductsPage({
         title="Products"
         description={
           result.total === 1 ? '1 product' : `${result.total.toLocaleString('en-GB')} products`
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/products/rules">Rules</Link>
+            </Button>
+            {canManage ? (
+              <Button asChild>
+                <Link href="/products/new">New product</Link>
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -62,6 +75,7 @@ export default async function ProductsPage({
       ) : (
         <ProductTable
           rows={result.rows}
+          canManage={canManage}
           page={result.page}
           pageCount={result.pageCount}
           total={result.total}

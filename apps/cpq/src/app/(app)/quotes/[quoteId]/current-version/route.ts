@@ -19,10 +19,7 @@ import { ERROR_STATUS, toSafeError } from '@nexora/observability';
  * Authorized like every other read: an invisible quote reports as not-found, so
  * this endpoint cannot be used to probe which quote ids exist.
  */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ quoteId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ quoteId: string }> }) {
   try {
     const actor = await getActor(await headers());
     if (!actor) {
